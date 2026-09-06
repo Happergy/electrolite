@@ -1,6 +1,6 @@
 import Chart from '../Chart/Chart';
 import CurrentPrice from '../CurrentPrice/CurrentPrice';
-import { PricesList } from '../../components/PricesList/PricesList';
+import { PricesList } from '../../PricesList/PricesList';
 
 export const ChartCard = () => {
   return (

@@ -1,6 +1,6 @@
-import HoursSection from '../../components/HoursSection/HoursSection';
-import { printPrice } from '../../lib/price';
-import { usePricesContext } from '../../context/PricesContext';
+import HoursSection from '../../HoursSection/HoursSection';
+import { printPrice } from '../../../lib/price';
+import { usePricesContext } from '../../../context/PricesContext';
 
 import styles from './List.module.css';
 
@@ -19,8 +19,7 @@ function List() {
             <li className={styles.window} key={duration}>
               <div className={styles.info}>
                 <strong>{duration} h</strong>
-                <span>{printPrice(window.totalPrice, true)}</span>
-                <small>{printPrice(window.averagePrice, true)} / h</small>
+                <small>{printPrice(window.totalPrice, true)} / h</small>
               </div>
               <HoursSection
                 isBestPrice

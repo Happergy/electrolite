@@ -1,6 +1,6 @@
-import { usePricesContext } from '../../context/PricesContext';
-import { useColors } from '../../hooks/useColors';
-import { printPrice } from '../../lib/price';
+import { usePricesContext } from '../../../context/PricesContext';
+import { useColors } from '../../../hooks/useColors';
+import { printPrice } from '../../../lib/price';
 import Box from '../Box/Box';
 
 import styles from './CurrentPrice.module.css';

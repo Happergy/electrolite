@@ -13,12 +13,12 @@ import {
 import dayjs from 'dayjs';
 import { Line } from 'react-chartjs-2';
 
-import { BG_COLORS, LINE_COLORS } from '../../domain/colors';
+import { BG_COLORS, LINE_COLORS } from '../../../domain/colors';
 
 import styles from './Chart.module.css';
-import { formatPrice } from '../../lib/price';
-import { useColors } from '../../hooks/useColors';
-import { usePricesContext } from '../../context/PricesContext';
+import { formatPrice } from '../../../lib/price';
+import { useColors } from '../../../hooks/useColors';
+import { usePricesContext } from '../../../context/PricesContext';
 
 ChartJS.register(LineElement, PointElement, LinearScale, Title, CategoryScale, Filler, Tooltip);
 

@@ -1,5 +1,5 @@
-import List from '../ChartSection/List/List';
-import { ChartCard } from '../ChartSection/ChartCard/ChartCard';
+import List from '../components/ChartSection/List/List';
+import { ChartCard } from '../components/ChartSection/ChartCard/ChartCard';
 import { usePricesContext } from '../context/PricesContext';
 
 function Main() {

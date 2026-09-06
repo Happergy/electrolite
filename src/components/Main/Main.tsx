@@ -1,6 +1,6 @@
 import List from '../ChartSection/List/List';
 import { ChartCard } from '../ChartSection/ChartCard/ChartCard';
-import { usePricesContext } from '../context/PricesContext';
+import { usePricesContext } from '../../context/PricesContext';
 
 function Main() {
   const { loading, error } = usePricesContext();
