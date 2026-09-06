@@ -18,12 +18,6 @@ function Main() {
   return (
     <>
       <section className={styles.pricesSection}>
-        <div className={styles.pricesToolbar}>
-          <h1 className={styles.heading}>Millors preus</h1>
-          <button className={styles.refreshButton} type='button' onClick={refreshPrices}>
-            Actualitza
-          </button>
-        </div>
         <List />
       </section>
       <section>

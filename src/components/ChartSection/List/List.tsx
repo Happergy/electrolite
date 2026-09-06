@@ -19,7 +19,7 @@ function List() {
             <li className={styles.window} key={duration}>
               <div className={styles.info}>
                 <strong>{duration} h</strong>
-                <small>{printPrice(window.totalPrice, true)} / h</small>
+                <small>{printPrice(window.totalPrice, false)}</small>
               </div>
               <HoursSection
                 isBestPrice

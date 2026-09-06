@@ -1,7 +1,7 @@
 .wrapper {
   display: flex;
-  justify-content: space-evenly;
-  padding: 16px 0 0;
+  justify-content: space-between;
+  padding: 16px 16px 0;
 }
 
 .green {
@@ -15,4 +15,19 @@
 
 .red {
   color: var(--red);
+}
+
+.prices {
+  display: flex;
+  gap: 32px;
+  width: 100%;
+  justify-content: space-evenly;
+}
+
+.refresh {
+  background-color: transparent;
+  border: none;
+  color: var(--secondary);
+  height: 2.75rem;
+  width: 2.75rem;
 }
