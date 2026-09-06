@@ -10,7 +10,6 @@ export const PricesList = () => {
   const { prices } = usePricesContext();
   const { getColor } = useColors();
 
-  console.log(prices);
   return (
     <ol className={styles.list}>
       {prices?.map(({ price, date, simulated }) => {
