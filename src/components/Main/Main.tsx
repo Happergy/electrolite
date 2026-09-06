@@ -3,7 +3,7 @@ import { ChartCard } from '../ChartSection/ChartCard/ChartCard';
 import { usePricesContext } from '../../context/PricesContext';
 
 function Main() {
-  const { loading, error } = usePricesContext();
+  const { loading, error, refreshPrices } = usePricesContext();
 
   if (loading) {
     return <p>Carregant...</p>;
@@ -17,6 +17,9 @@ function Main() {
     <>
       <section>
         <List />
+        <button type='button' onClick={refreshPrices}>
+          Actualitza
+        </button>
       </section>
       <section>
         <ChartCard />

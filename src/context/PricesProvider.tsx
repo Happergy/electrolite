@@ -9,6 +9,7 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
     const [prices, setPrices] = useState<PriceDetails[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
+    const [refreshKey, setRefreshKey] = useState(0);
     const nextPrices = prices.slice(0, 24);
     const avgPrice = nextPrices.reduce((sum, price) => sum + price.price, 0) / (nextPrices.length || 1);
     const validPrices = nextPrices.filter(({ price }) => price >= 0);
@@ -55,6 +56,11 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
         {},
     );
 
+    const refreshPrices = () => {
+        setLoading(true);
+        setError(null);
+        setRefreshKey((key) => key + 1);
+    };
 
     useEffect(() => {
         const controller = new AbortController();
@@ -110,11 +116,11 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
         loadPrices();
 
         return () => controller.abort();
-    }, []);
+    }, [refreshKey]);
 
     return (
         <PricesContext.Provider
-            value={{ prices: nextPrices, bestPrice, worstPrice, avgPrice, currentPrice, bestPrices, loading, error }}
+            value={{ prices: nextPrices, bestPrice, worstPrice, avgPrice, currentPrice, bestPrices, loading, error, refreshPrices }}
         >
             {children}
         </PricesContext.Provider>
