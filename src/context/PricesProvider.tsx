@@ -10,6 +10,15 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
     const [refreshKey, setRefreshKey] = useState(0);
+
+    useEffect(() => {
+        const now = dayjs();
+        const nextHour = now.add(1, 'hour').startOf('hour');
+        const refreshTimer = window.setTimeout(() => window.location.reload(), Math.max(nextHour.diff(now), 1));
+
+        return () => window.clearTimeout(refreshTimer);
+    }, []);
+
     const nextPrices = prices.slice(0, 24);
     const avgPrice = nextPrices.reduce((sum, price) => sum + price.price, 0) / (nextPrices.length || 1);
     const validPrices = nextPrices.filter(({ price }) => price >= 0);
