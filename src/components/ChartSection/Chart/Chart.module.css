@@ -1,0 +1,16 @@
+.wrapper {
+  padding: 16px;
+  height: 250px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.provisional {
+  align-items: center;
+  color: var(--grey);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+  padding: 0 16px 16px;
+  margin: 0;
+}

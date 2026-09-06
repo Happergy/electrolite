@@ -1,0 +1,39 @@
+{
+  "name": "happergy",
+  "version": "3.28.1",
+  "description": "Get the best price of PVPC rate",
+  "main": "index.js",
+  "scripts": {
+    "start": "vite",
+    "pro": "vite build",
+    "coverage": "jest --coverage",
+    "deploy": "firebase deploy  --project best-price-pvpc --only hosting",
+    "preview": "vite preview",
+    "test": "jest",
+    "check": "biome check .",
+    "format": "biome format --write ."
+  },
+  "author": "Jordi Turull",
+  "license": "ISC",
+  "dependencies": {
+    "@vitejs/plugin-react-swc": "^4.3.3",
+    "chart.js": "^4.5.1",
+    "dayjs": "^1.11.23",
+    "react": "^19.2.8",
+    "react-chartjs-2": "^5.3.1",
+    "react-dom": "^19.2.8",
+    "vite": "^8.2.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.12",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@types/umami": "^2.10.1",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^30.5.1",
+    "jest-environment-jsdom": "^30.5.1",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,104 @@
+.list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--pure-white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  list-style: none;
+}
+
+.container {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 20px 2.25rem minmax(0, 1fr);
+  gap: 10px;
+  padding: 9px 8px;
+  color: var(--pure-black);
+  width: auto;
+}
+
+.colorBox {
+  box-sizing: border-box;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--pure-black);
+  border-radius: 2px;
+}
+
+.bestPrice {
+  position: relative;
+  box-shadow: 0 0 0 3px var(--pure-white), 0 0 0 4px var(--pure-black);
+}
+
+.bestPrice::before,
+.bestPrice::after {
+  position: absolute;
+  top: 2px;
+  left: 8px;
+  width: 2px;
+  height: 12px;
+  background: var(--pure-black);
+  content: '';
+}
+
+.bestPrice::before {
+  transform: rotate(45deg);
+}
+
+.bestPrice::after {
+  transform: rotate(-45deg);
+}
+
+.worstPrice {
+  transform: rotate(45deg);
+}
+
+.price {
+  display: inline-block;
+  min-width: 4rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: right;
+}
+
+.item {
+  display: flex;
+  justify-content: center;
+  background: var(--pure-white);
+}
+
+.item:nth-child(n + 2) {
+  border-top: 1px solid var(--border);
+}
+
+@media (min-width: 481px) {
+  .list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .item:not(:nth-child(4n)) {
+    border-right: 1px solid var(--border);
+  }
+
+  .item:nth-child(4n + 1) {
+    border-top: 1px solid var(--border);
+  }
+
+  .container {
+    grid-template-columns: 20px 2.5rem minmax(0, 1fr);
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .price {
+    min-width: 5rem;
+  }
+}
+
+.time {
+  margin-left: 6px;
+}

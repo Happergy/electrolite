@@ -1,0 +1,26 @@
+.wrapper {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  color: var(--grey);
+  display: flex;
+  font-size: 0.7rem;
+}
+
+.number {
+  font-family: 'MontserratBold', sans-serif;
+  font-size: 1.2rem;
+  padding: 5px 0;
+}
+
+.subline {
+  color: var(--grey);
+  font-size: 0.8rem;
+}
+
+.monocolor {
+  color: inherit;
+}
