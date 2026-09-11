@@ -42,20 +42,17 @@
 
 .loader {
   display: flex;
-  width: 7.25rem;
-  height: 2.5rem;
-  border-radius: 6px;
-  animation: pulse 2s infinite;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
 @keyframes pulse {
   0% {
     background-color: var(--border);
   }
+
   50% {
     background-color: var(--pure-white);
   }
+
   100% {
     background-color: var(--border);
   }
