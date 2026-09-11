@@ -4,6 +4,15 @@ import PricesContext from './PricesContext';
 import { BestPriceWindow, PriceDetails } from '../types';
 
 const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/Happergy/happergy-prices/main/data';
+const HAPPERGY_PRICES_URL = `${GITHUB_RAW_URL}/happergy-pvpc.json`;
+
+type HappergyPricesResponse = {
+    pvpc?: {
+        prices?: {
+            nextPrices?: PriceDetails[];
+        };
+    };
+};
 
 export const PricesProvider = ({ children }: PropsWithChildren) => {
     const [prices, setPrices] = useState<PriceDetails[]>([]);
@@ -87,6 +96,23 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
             return rawResponse.json();
         };
 
+        const getTomorrowPricesFromHappergyFeed = async (date: dayjs.Dayjs) => {
+            const rawResponse = await fetch(HAPPERGY_PRICES_URL, {
+                signal: controller.signal,
+            });
+
+            if (!rawResponse.ok) {
+                throw new Error(`Happergy price feed request failed: ${rawResponse.status}`);
+            }
+
+            const data = (await rawResponse.json()) as HappergyPricesResponse;
+            const tomorrowDate = date.format('YYYY-MM-DD');
+
+            return (data.pvpc?.prices?.nextPrices ?? []).filter((price) =>
+                price.date.startsWith(tomorrowDate),
+            );
+        };
+
         const loadPrices = async () => {
             try {
                 const today = dayjs();
@@ -99,8 +125,8 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
                         const tomorrowPrices = await getPricesForDate(today.add(1, 'day'));
                         upcomingPrices = [...remainingToday, ...tomorrowPrices];
                     } catch (_error) {
-                        // Do nothing
-
+                        const tomorrowPrices = await getTomorrowPricesFromHappergyFeed(today.add(1, 'day'));
+                        upcomingPrices = [...remainingToday, ...tomorrowPrices];
                     }
                 }
 
