@@ -27,6 +27,7 @@
 .refresh {
   background-color: transparent;
   border: none;
+  color: var(--secondary);
   height: 2.75rem;
   width: 2.75rem;
 }
