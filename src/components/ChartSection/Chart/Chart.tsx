@@ -141,6 +141,7 @@ function Chart() {
   const max = formatPrice(worstPrice?.price) + 0.03;
 
   const options = {
+    animation: false,
     maintainAspectRatio: false,
     scales: {
       y: {
