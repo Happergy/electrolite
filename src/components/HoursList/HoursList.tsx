@@ -17,10 +17,7 @@ function HoursList() {
 
           return (
             <li className={styles.window} key={duration}>
-              <div className={styles.info}>
-                <strong>{duration} h</strong>
-                <small>{printPrice(window.totalPrice, true)} / h</small>
-              </div>
+              <div className={styles.info}>{duration} h</div>
               <HoursSection
                 isBestPrice
                 startTime={window.startTime}

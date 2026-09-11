@@ -34,32 +34,34 @@ function HoursSection({
   const renderRemainingHours = (hours: number) =>
     remainingHours <= 24 ? hours : `1 dia i ${hours - 24}`;
 
-  const timeUntil = !remainingHours ? (
-    <span>Ara</span>
-  ) : (
-    <>
-      <span>{`${isShowingStartTime ? 'Falten' : 'Acaba en'} `}</span>
-      <span className="highlight">{` ${isShowingStartTime
-        ? renderRemainingHours(remainingHours)
-        : renderRemainingHours(remainingHours + duration)
-        }h`}</span>
-    </>
-  );
 
   return isValidDate ? (
-    <button
-      type="button"
-      className={`${styles.wrapper} ${isBestPrice ? styles.best : ''}`.trim()}
-      onClick={() => setIsShowingStartTime((current) => !current)}
-      aria-pressed={isShowingStartTime}
-    >
+    <>
       <div className={styles.hours}>
         <time dateTime={startTime}>{start}</time>
         <span className={styles.separator}>{' - '}</span>
         <time dateTime={endTime}>{end}</time>
       </div>
-      <p className={`${styles.remaining}`}>{timeUntil}</p>
-    </button>
+      {
+        !remainingHours ? (
+          <span className={styles.remaining}>Ara</span>
+        ) : (
+          <button
+            type="button"
+            className={styles.wrapper}
+            onClick={() => setIsShowingStartTime((current) => !current)}
+            aria-pressed={isShowingStartTime}
+          >
+            <p className={styles.remaining}>
+              <span>{isShowingStartTime ? 'Falten' : 'Acaba en'}</span>
+              <span className="highlight">{` ${isShowingStartTime
+                ? renderRemainingHours(remainingHours)
+                : renderRemainingHours(remainingHours + duration)
+                }h`}</span>
+            </p>
+          </button>
+        )}
+    </>
   ) : (
     <div className={styles.loader}>&nbsp;</div>
   );
