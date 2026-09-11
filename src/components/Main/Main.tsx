@@ -1,6 +1,6 @@
-import List from '../components/ChartSection/List/List';
-import { ChartCard } from '../components/ChartSection/ChartCard/ChartCard';
-import { usePricesContext } from '../context/PricesContext';
+import HoursList from '../HoursList/HoursList';
+import { ChartCard } from '../ChartSection/ChartCard/ChartCard';
+import { usePricesContext } from '../../context/PricesContext';
 
 import styles from './Main.module.css';
 
@@ -11,7 +11,7 @@ function Main() {
     <>
       {error && <p>No s'han pogut carregar els preus.</p>}
       <section className={styles.pricesSection}>
-        <List />
+        <HoursList />
       </section>
       <section>
         <ChartCard />

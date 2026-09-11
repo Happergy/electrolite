@@ -11,14 +11,6 @@
   padding: 0;
 }
 
-.wrapper.best {
-  color: var(--pure-black);
-}
-
-.wrapper.best .hours {
-  color: var(--pure-black);
-}
-
 .hours {
   color: var(--secondary);
   display: flex;
@@ -28,6 +20,7 @@
 }
 
 .remaining {
+  color: var(--pure-black);
   display: flex;
   font-size: 0.75rem;
   justify-content: center;
@@ -42,18 +35,4 @@
 
 .loader {
   display: flex;
-}
-
-@keyframes pulse {
-  0% {
-    background-color: var(--border);
-  }
-
-  50% {
-    background-color: var(--pure-white);
-  }
-
-  100% {
-    background-color: var(--border);
-  }
 }

@@ -98,10 +98,9 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
                     try {
                         const tomorrowPrices = await getPricesForDate(today.add(1, 'day'));
                         upcomingPrices = [...remainingToday, ...tomorrowPrices];
-                    } catch (tomorrowError) {
-                        if (!(tomorrowError instanceof Error) || tomorrowError.name !== 'AbortError') {
-                            console.warn('Tomorrow prices are not available yet');
-                        }
+                    } catch (_error) {
+                        // Do nothing
+
                     }
                 }
 

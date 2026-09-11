@@ -16,7 +16,6 @@
   "author": "Jordi Turull",
   "license": "ISC",
   "dependencies": {
-    "@vitejs/plugin-react-swc": "^4.3.3",
     "chart.js": "^4.5.1",
     "dayjs": "^1.11.23",
     "react": "^19.2.8",
@@ -31,6 +30,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@types/umami": "^2.10.1",
+    "@vitejs/plugin-react": "^6.1.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^30.5.1",
     "jest-environment-jsdom": "^30.5.1",
