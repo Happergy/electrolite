@@ -74,12 +74,6 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
         {},
     );
 
-    const refreshPrices = () => {
-        setLoading(true);
-        setError(null);
-        setRefreshKey((key) => key + 1);
-    };
-
     useEffect(() => {
         const controller = new AbortController();
 
@@ -154,7 +148,7 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
 
     return (
         <PricesContext.Provider
-            value={{ prices: nextPrices, bestPrice, worstPrice, avgPrice, currentPrice, bestPrices, loading, error, refreshPrices }}
+            value={{ prices: nextPrices, bestPrice, worstPrice, avgPrice, currentPrice, bestPrices, loading, error }}
         >
             {children}
         </PricesContext.Provider>

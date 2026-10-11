@@ -10,7 +10,6 @@ export type PricesContextValue = {
     error: Error | null;
     currentPrice: PriceDetails;
     bestPrices: Record<number, BestPriceWindow>;
-    refreshPrices: () => void;
 };
 
 export const PricesContext = createContext<PricesContextValue | undefined>(undefined);

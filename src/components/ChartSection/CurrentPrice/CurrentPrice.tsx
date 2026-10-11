@@ -7,7 +7,7 @@ import styles from './CurrentPrice.module.css';
 
 function CurrentPrice() {
 
-  const { avgPrice, currentPrice, refreshPrices } = usePricesContext();
+  const { avgPrice, currentPrice } = usePricesContext();
   const { color } = useColors();
 
 
@@ -20,7 +20,7 @@ function CurrentPrice() {
         <Box label="Actual" number={numberElement} />
         <Box label="Mitjana" number={printPrice(avgPrice)} />
       </div>
-      <button type='button' onClick={refreshPrices} aria-label='Actualitzar preus' className={styles.refresh}>
+      <button type='button' onClick={() => window.location.reload()} aria-label='Actualitzar preus' className={styles.refresh}>
         <svg
           aria-hidden='true'
           fill='none'
