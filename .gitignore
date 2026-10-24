@@ -16,6 +16,8 @@ _docpress
 .DS_Store
 
 lib
+!src/lib/
+!src/lib/**
 dist
 tsconfig.tsbuildinfo
 tsconfig.lint.tsbuildinfo

@@ -3,6 +3,7 @@ import { BestPriceWindow, PriceDetails } from '../types';
 
 export type PricesContextValue = {
     prices: PriceDetails[];
+    chartPrices: PriceDetails[];
     bestPrice: PriceDetails;
     worstPrice: PriceDetails;
     avgPrice: number;

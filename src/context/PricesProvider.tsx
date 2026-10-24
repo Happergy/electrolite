@@ -2,23 +2,21 @@ import { useEffect, useState, type PropsWithChildren } from 'react';
 import dayjs from 'dayjs';
 import PricesContext from './PricesContext';
 import { BestPriceWindow, PriceDetails } from '../types';
-
-const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/Happergy/happergy-prices/main/data';
-const HAPPERGY_PRICES_URL = `${GITHUB_RAW_URL}/happergy-pvpc.json`;
-
-type HappergyPricesResponse = {
-    pvpc?: {
-        prices?: {
-            nextPrices?: PriceDetails[];
-        };
-    };
-};
+import { getEstimatedPVPC } from '../lib/pvpcEstimate';
+import { getPVPC, isCompletePVPCDay, parsePriceDatePVPC } from '../lib/pvpcPrices';
+import { initializePriceCache } from '../lib/priceCache';
 
 export const PricesProvider = ({ children }: PropsWithChildren) => {
     const [prices, setPrices] = useState<PriceDetails[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
     const [refreshKey, setRefreshKey] = useState(0);
+
+    useEffect(() => {
+        initializePriceCache().catch((cacheError: unknown) => {
+            console.warn('Unable to initialize the local price cache.', cacheError);
+        });
+    }, []);
 
     useEffect(() => {
         const now = dayjs();
@@ -30,7 +28,7 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
 
     const nextPrices = prices.slice(0, 24);
     const avgPrice = nextPrices.reduce((sum, price) => sum + price.price, 0) / (nextPrices.length || 1);
-    const validPrices = nextPrices.filter(({ price }) => price >= 0);
+    const validPrices = nextPrices.filter(({ price }) => Number.isFinite(price));
     const firstPrice = validPrices[0] || { price: 0, date: '' };
     const bestPrice = validPrices.reduce(
         (min, price) => (price.price < min.price ? price : min),
@@ -77,34 +75,17 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
     useEffect(() => {
         const controller = new AbortController();
 
-        const getPricesForDate = async (date: dayjs.Dayjs) => {
-            const fileName = `${date.format('YYYYMMDD')}-pvpc.json`;
-            const rawResponse = await fetch(`${GITHUB_RAW_URL}/${fileName}`, {
-                signal: controller.signal,
-            });
-
-            if (!rawResponse.ok) {
-                throw new Error(`Price file request failed: ${rawResponse.status}`);
+        const getPricesForDate = async (
+            date: dayjs.Dayjs,
+            requireComplete = false,
+        ): Promise<PriceDetails[]> => {
+            const dateKey = date.format('YYYY-MM-DD');
+            const pvpcEntries = await getPVPC(dateKey);
+            if (requireComplete && !isCompletePVPCDay(dateKey, pvpcEntries)) {
+                return [];
             }
 
-            return rawResponse.json();
-        };
-
-        const getTomorrowPricesFromHappergyFeed = async (date: dayjs.Dayjs) => {
-            const rawResponse = await fetch(HAPPERGY_PRICES_URL, {
-                signal: controller.signal,
-            });
-
-            if (!rawResponse.ok) {
-                throw new Error(`Happergy price feed request failed: ${rawResponse.status}`);
-            }
-
-            const data = (await rawResponse.json()) as HappergyPricesResponse;
-            const tomorrowDate = date.format('YYYY-MM-DD');
-
-            return (data.pvpc?.prices?.nextPrices ?? []).filter((price) =>
-                price.date.startsWith(tomorrowDate),
-            );
+            return parsePriceDatePVPC(pvpcEntries);
         };
 
         const loadPrices = async () => {
@@ -115,21 +96,45 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
                 let upcomingPrices = remainingToday;
 
                 if (remainingToday.length < 24) {
+                    const tomorrow = today.add(1, 'day');
+                    const sourceErrors: Error[] = [];
+                    let tomorrowPrices: PriceDetails[] = [];
+
                     try {
-                        const tomorrowPrices = await getPricesForDate(today.add(1, 'day'));
-                        upcomingPrices = [...remainingToday, ...tomorrowPrices];
-                    } catch (_error) {
-                        const tomorrowPrices = await getTomorrowPricesFromHappergyFeed(today.add(1, 'day'));
+                        tomorrowPrices = await getPricesForDate(tomorrow, true);
+                    } catch (requestError) {
+                        sourceErrors.push(
+                            requestError instanceof Error ? requestError : new Error('Unable to load tomorrow PVPC'),
+                        );
+                    }
+
+                    if (tomorrowPrices.length === 0) {
+                        try {
+                            tomorrowPrices = await getEstimatedPVPC(tomorrow.format('YYYY-MM-DD'));
+                        } catch (requestError) {
+                            sourceErrors.push(
+                                requestError instanceof Error
+                                    ? requestError
+                                    : new Error('Unable to estimate tomorrow PVPC prices'),
+                            );
+                        }
+                    }
+
+                    if (tomorrowPrices.length === 0) {
+                        const reasons = sourceErrors.map(({ message }) => message).join('; ');
+                        const error = new Error(`Unable to load or estimate tomorrow prices: ${reasons}`);
+
+                        if (remainingToday.length === 0) {
+                            throw error;
+                        }
+
+                        console.warn('Tomorrow prices are unavailable; showing the remaining prices for today.', error);
+                    } else {
                         upcomingPrices = [...remainingToday, ...tomorrowPrices];
                     }
                 }
 
-                setPrices(
-                    upcomingPrices.slice(0, 24).map((price: PriceDetails) => ({
-                        ...price,
-                        price: Math.max(0, price.price),
-                    })),
-                );
+                setPrices(upcomingPrices.map((price: PriceDetails) => ({ ...price })));
             } catch (requestError) {
                 if (!(requestError instanceof Error) || requestError.name !== 'AbortError') {
                     setError(requestError instanceof Error ? requestError : new Error('Unable to load prices'));
@@ -148,7 +153,17 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
 
     return (
         <PricesContext.Provider
-            value={{ prices: nextPrices, bestPrice, worstPrice, avgPrice, currentPrice, bestPrices, loading, error }}
+            value={{
+                prices: nextPrices,
+                chartPrices: prices,
+                bestPrice,
+                worstPrice,
+                avgPrice,
+                currentPrice,
+                bestPrices,
+                loading,
+                error,
+            }}
         >
             {children}
         </PricesContext.Provider>

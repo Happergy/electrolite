@@ -9,6 +9,8 @@
   "scripts": {
     "start": "vite",
     "pro": "vite build",
+    "prices:update": "node scripts/update-prices.mjs",
+    "prices:test": "node --test scripts/update-prices-check.mjs",
     "coverage": "jest --coverage",
     "deploy": "firebase deploy  --project best-price-pvpc --only hosting",
     "preview": "vite preview",
@@ -21,6 +23,7 @@
   "dependencies": {
     "chart.js": "^4.5.1",
     "dayjs": "^1.11.23",
+    "papaparse": "^5.7.0",
     "react": "^19.3.0",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.3.0",

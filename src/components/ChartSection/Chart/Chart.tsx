@@ -22,12 +22,23 @@ import styles from './Chart.module.css';
 ChartJS.register(LineElement, PointElement, LinearScale, Title, CategoryScale, Filler, Tooltip);
 
 function Chart() {
-  const { prices, bestPrice, worstPrice, avgPrice } = usePricesContext();
+  const { chartPrices, bestPrice, avgPrice } = usePricesContext();
   const { color: currentColor, getColor } = useColors();
   const isProvisionalPricesAvailable = useRef(false);
-  const nextPrices = prices?.slice(0, 24) || [];
+  const today = dayjs().format('YYYY-MM-DD');
+  const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
+  const nextPrices =
+    chartPrices?.filter(({ date }) => {
+      const dateKey = dayjs(date).format('YYYY-MM-DD');
+      return dateKey === today || dateKey === tomorrow;
+    }) || [];
+  const chartAverage =
+    nextPrices.length > 0
+      ? nextPrices.reduce((sum, { price }) => sum + price, 0) / nextPrices.length
+      : avgPrice;
 
   const formatDate = (date: string) => `${dayjs(date).format('HH')}h`;
+  const getChartValue = (price: number) => Math.max(0, formatPrice(price));
   const getValue = (dataIndex: number, dataset) => dataset.data[dataIndex];
 
   /**
@@ -38,7 +49,9 @@ function Chart() {
    * @returns {boolean}
    */
   const isBestPrice = (value: string, dataIndex: number, length: number) =>
-    dataIndex && dataIndex < length - 1 && value === formatPrice(bestPrice.price);
+    dataIndex &&
+    dataIndex < length - 1 &&
+    value === getChartValue(bestPrice.price);
 
   const pointBorderColor = ({ dataIndex, dataset }: { dataIndex: number; dataset: any }) => {
     const value = getValue(dataIndex, dataset);
@@ -70,13 +83,13 @@ function Chart() {
     let lastPrice = null;
 
     const data = nextPrices.filter(({ simulated }) => !simulated);
-    const prices = data.map(({ price }) => formatPrice(price));
+    const prices = data.map(({ price }) => getChartValue(price));
 
     const simulatedData = nextPrices.filter((price) => price.simulated);
     const simulatedPrices = simulatedData.map(() => null);
 
     if (simulatedData.length !== 0) {
-      prices.push(formatPrice(simulatedData[0].price));
+      prices.push(getChartValue(simulatedData[0].price));
       isProvisionalPricesAvailable.current = true;
     } else {
       lastPrice = prices[prices.length - 1];
@@ -87,7 +100,7 @@ function Chart() {
 
   const getSimulatedChartData = () => {
     const prices = nextPrices.map(({ price, simulated }) =>
-      simulated ? formatPrice(price) : null,
+      simulated ? getChartValue(price) : null,
     );
     return [...prices, prices[prices.length - 1]];
   };
@@ -130,7 +143,7 @@ function Chart() {
         label: 'Preu mitjà',
         borderWidth: 2,
         borderDash: [4, 2],
-        data: [...nextPrices.map(() => formatPrice(avgPrice)), formatPrice(avgPrice)], // all with same value
+        data: [...nextPrices.map(() => getChartValue(chartAverage)), getChartValue(chartAverage)], // all with same value
         backgroundColor: 'transparent',
         borderColor: '#999',
         pointRadius: 0,
@@ -138,7 +151,7 @@ function Chart() {
     ],
   };
 
-  const max = formatPrice(worstPrice?.price) + 0.03;
+  const max = Math.max(0, ...nextPrices.map(({ price }) => getChartValue(price))) + 0.03;
 
   const options = {
     animation: false,
