@@ -7,6 +7,7 @@ import {
   LineElement,
   LinearScale,
   PointElement,
+  type Plugin,
   Title,
   Tooltip,
 } from 'chart.js';
@@ -24,7 +25,7 @@ ChartJS.register(LineElement, PointElement, LinearScale, Title, CategoryScale, F
 
 function Chart() {
   const { chartPrices, bestPrice, avgPrice } = usePricesContext();
-  const { color: currentColor, getColor } = useColors();
+  const { getColor } = useColors();
   const { theme } = useTheme();
   const isProvisionalPricesAvailable = useRef(false);
   const today = dayjs().format('YYYY-MM-DD');
@@ -107,17 +108,63 @@ function Chart() {
     return [...prices, prices[prices.length - 1]];
   };
 
+  const areaFillPlugin: Plugin<'line'> = {
+    id: 'price-area-fill',
+    beforeDatasetsDraw: (chart) => {
+      const meta = chart.getDatasetMeta(0);
+      const data = chart.data.datasets[0]?.data;
+      if (!meta.visible || !data) {
+        return;
+      }
+
+      const { ctx, chartArea } = chart;
+      const baseline = chartArea.bottom;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(chartArea.left, chartArea.top, chartArea.width, chartArea.height);
+      ctx.clip();
+
+      for (let index = 0; index < meta.data.length - 1; index += 1) {
+        const startValue = data[index];
+        const endValue = data[index + 1];
+        const start = meta.data[index];
+        const end = meta.data[index + 1];
+
+        if (typeof startValue !== 'number' || typeof endValue !== 'number' || start.skip || end.skip) {
+          continue;
+        }
+
+        const { x: startX, y: startY } = start.getProps(['x', 'y'], true);
+        const { x: endX, y: endY } = end.getProps(['x', 'y'], true);
+        const color = nextPrices[index]?.simulated
+          ? BG_COLORS.grey
+          : BG_COLORS[getColor(startValue)];
+
+        ctx.beginPath();
+        ctx.moveTo(startX, baseline);
+        ctx.lineTo(startX, startY);
+        ctx.lineTo(endX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.lineTo(endX, baseline);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+      }
+
+      ctx.restore();
+    },
+  };
+
   const lineData = nextPrices && {
     labels: [...nextPrices.map(({ date }) => formatDate(date)), '00h'],
     datasets: [
       {
         datasetIdKey: 'prices',
         label: 'Preu',
-        backgroundColor: BG_COLORS[currentColor],
         borderColor: BG_COLORS.grey,
         borderWidth: 2,
         data: getChartData(),
-        fill: true,
+        fill: false,
         pointBackgroundColor: pointBorderColor,
         pointBorderColor,
         pointBorderWidth,
@@ -192,7 +239,9 @@ function Chart() {
   return (
     <>
       <div className={styles.wrapper}>
-        {nextPrices && nextPrices.length > 0 && <Line data={lineData} options={options} />}
+        {nextPrices && nextPrices.length > 0 && (
+          <Line data={lineData} options={options} plugins={[areaFillPlugin]} />
+        )}
       </div>
     </>
   );
