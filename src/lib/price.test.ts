@@ -26,4 +26,10 @@ describe('printPrice', () => {
   it('prints negative prices instead of replacing them with zero', () => {
     expect(printPrice(-1314, true)).toBe('-0.01€ / kWh');
   });
+
+  it('shows the first non-zero decimal for small negative prices when requested', () => {
+    expect(printPrice(-0.004, true, true)).toBe('-0.004€ / kWh');
+    expect(printPrice(-0.00003, true, true)).toBe('-0.00003€ / kWh');
+    expect(printPrice(-0.004, true)).toBe('0.00€ / kWh');
+  });
 });

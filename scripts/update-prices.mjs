@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import Papa from 'papaparse';
-import { access, mkdir, readdir, rename, unlink, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, readdir, rename, unlink, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -13,6 +13,7 @@ const MADRID_TZ = 'Europe/Madrid';
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const projectDirectory = resolve(scriptDirectory, '..');
 const pricesDirectory = resolve(projectDirectory, 'public/prices');
+const pvpcAdditionalFields = ['PMHPCB', 'TAHPCB'];
 
 export const expectedHoursInDay = (date) => {
   const start = dayjs.tz(date, MADRID_TZ).startOf('day');
@@ -20,22 +21,46 @@ export const expectedHoursInDay = (date) => {
   return dayjs.tz(nextDay, MADRID_TZ).startOf('day').diff(start, 'hour');
 };
 
-const isValidPVPCPayload = (payload, date) => {
+export const minimizePVPCPayload = (payload, date) => {
   if (!Array.isArray(payload?.PVPC)) {
-    return false;
+    return null;
   }
 
   const expectedDate = dayjs.tz(date, MADRID_TZ).format('DD/MM/YYYY');
-  return (
-    payload.PVPC.length === expectedHoursInDay(date) &&
-    payload.PVPC.every(
+  if (
+    payload.PVPC.length !== expectedHoursInDay(date) ||
+    !payload.PVPC.every(
       ({ PCB, Dia, Hora }) =>
         Dia === expectedDate &&
         /^\d{2}-\d{2}$/.test(Hora) &&
         Number.isFinite(Number.parseFloat(String(PCB).replace(',', '.'))),
     )
-  );
+  ) {
+    return null;
+  }
+
+  return {
+    PVPC: payload.PVPC.map((entry) => ({
+      Dia: entry.Dia,
+      Hora: entry.Hora,
+      PCB: entry.PCB,
+      ...Object.fromEntries(
+        pvpcAdditionalFields
+          .filter((field) => typeof entry[field] === 'string')
+          .map((field) => [field, entry[field]]),
+      ),
+    })),
+  };
 };
+
+const hasPVPCEstimateComponents = (payload) =>
+  payload.PVPC.every(
+    ({ PMHPCB, TAHPCB }) =>
+      typeof PMHPCB === 'string' &&
+      Number.isFinite(Number.parseFloat(PMHPCB.replace(',', '.'))) &&
+      typeof TAHPCB === 'string' &&
+      Number.isFinite(Number.parseFloat(TAHPCB.replace(',', '.'))),
+  );
 
 export const parseOmieCsv = (csv, date) => {
   const rows = Papa.parse(csv, {
@@ -145,10 +170,7 @@ const requestPVPC = async (date) => {
   }
 
   const payload = await response.json();
-  if (!isValidPVPCPayload(payload, date)) {
-    return null;
-  }
-  return payload;
+  return minimizePVPCPayload(payload, date);
 };
 
 const requestOMIE = async (date) => {
@@ -171,6 +193,37 @@ const refreshFile = async ({ source, date, isToday }) => {
   const filePath = resolve(pricesDirectory, fileName);
 
   if (await fileExists(filePath)) {
+    if (source === 'pvpc') {
+      const existingPayload = JSON.parse(await readFile(filePath, 'utf8'));
+      const minimizedPayload = minimizePVPCPayload(existingPayload, date);
+      if (minimizedPayload) {
+        if (hasPVPCEstimateComponents(minimizedPayload)) {
+          if (JSON.stringify(existingPayload) !== JSON.stringify(minimizedPayload)) {
+            await writeJSON(filePath, minimizedPayload);
+            console.log(`Minimized ${fileName}.`);
+            return true;
+          }
+
+          console.log(`${fileName} already exists; skipping.`);
+          return false;
+        }
+
+        try {
+          const enrichedPayload = await requestPVPC(date);
+          if (enrichedPayload && hasPVPCEstimateComponents(enrichedPayload)) {
+            await writeJSON(filePath, enrichedPayload);
+            console.log(`Enriched ${fileName} with PVPC cost components.`);
+            return true;
+          }
+        } catch (error) {
+          console.warn(`Unable to enrich ${fileName}; keeping existing PVPC prices.`, error);
+        }
+
+        console.log(`${fileName} already exists without estimate components; keeping it.`);
+        return false;
+      }
+    }
+
     console.log(`${fileName} already exists; skipping.`);
     return false;
   }

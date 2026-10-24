@@ -11,9 +11,30 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const MADRID_TZ = 'Europe/Madrid';
-const DAILY_MARKET_WEIGHT = 0.45;
+
+const getDailyMarketWeight = (date: string): number => {
+  const year = dayjs(date).tz(MADRID_TZ).year();
+
+  if (year === 2024) {
+    return 0.75;
+  }
+  if (year === 2025) {
+    return 0.6;
+  }
+
+  return 0.45;
+};
 
 const getPriceHour = (price: OmiePrice): number => dayjs(price.date).tz(MADRID_TZ).hour();
+
+const getComponentPrice = (entry: PVPCPriceEntry, field: 'PMHPCB' | 'TAHPCB'): number | null => {
+  const value = entry[field];
+  if (typeof value !== 'string' || !Number.isFinite(Number.parseFloat(value.replace(',', '.')))) {
+    return null;
+  }
+
+  return formatPrice(value);
+};
 
 export const estimatePVPCPrices = (
   previousPVPC: PVPCPriceEntry[],
@@ -24,7 +45,16 @@ export const estimatePVPCPrices = (
     throw new Error('Insufficient hourly PVPC and OMIE data to estimate tomorrow prices.');
   }
 
-  const previousPricesByHour = new Map<number, Array<{ pvpcPrice: number; omiePrice: number }>>();
+  const previousDailyAverage =
+    previousOMIE.reduce((sum, price) => sum + price.price, 0) / previousOMIE.length;
+  const nextDailyAverage = nextOMIE.reduce((sum, price) => sum + price.price, 0) / nextOMIE.length;
+  const dailyMarketWeight = getDailyMarketWeight(nextOMIE[0].date);
+  const forwardMarketWeight = 1 - dailyMarketWeight;
+  // Assume the forward basket and non-market cost terms remain unchanged from the reference day.
+  const previousPricesByHour = new Map<
+    number,
+    Array<{ omiePrice: number; pmhPrice: number; tahPrice: number; otherCosts: number }>
+  >();
 
   previousPVPC.forEach((entry, index) => {
     const hour = getFirstHour(entry.Hora);
@@ -33,9 +63,13 @@ export const estimatePVPCPrices = (
     }
 
     const previousPrices = previousPricesByHour.get(hour) ?? [];
+    const previousPmh = getComponentPrice(entry, 'PMHPCB') ?? previousOMIE[index].price;
+    const previousTah = getComponentPrice(entry, 'TAHPCB') ?? 0;
     previousPrices.push({
-      pvpcPrice: formatPrice(entry.PCB),
       omiePrice: previousOMIE[index].price,
+      pmhPrice: previousPmh,
+      tahPrice: previousTah,
+      otherCosts: formatPrice(entry.PCB) - previousPmh - previousTah,
     });
     previousPricesByHour.set(hour, previousPrices);
   });
@@ -57,7 +91,11 @@ export const estimatePVPCPrices = (
     return {
       date: omiePrice.date,
       price: Math.round(
-        previousPrice.pvpcPrice + DAILY_MARKET_WEIGHT * (omiePrice.price - previousPrice.omiePrice),
+        previousPrice.pmhPrice +
+          (omiePrice.price - previousPrice.omiePrice) +
+          previousPrice.tahPrice -
+          forwardMarketWeight * (nextDailyAverage - previousDailyAverage) +
+          previousPrice.otherCosts,
       ),
       simulated: true,
     };

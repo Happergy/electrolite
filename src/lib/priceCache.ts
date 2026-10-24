@@ -7,7 +7,7 @@ dayjs.extend(timezone);
 
 const MADRID_TZ = 'Europe/Madrid';
 const DATABASE_NAME = 'electralite-pvpc';
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 const STORE_NAMES = ['pvpc', 'omie'] as const;
 
 export type PriceSource = (typeof STORE_NAMES)[number];
@@ -57,12 +57,16 @@ const openPriceDatabase = (): Promise<IDBDatabase> =>
 
     const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
 
-    request.onupgradeneeded = () => {
+    request.onupgradeneeded = (event) => {
       const database = request.result;
       for (const storeName of STORE_NAMES) {
         if (!database.objectStoreNames.contains(storeName)) {
           database.createObjectStore(storeName, { keyPath: 'date' });
         }
+      }
+
+      if (event.oldVersion < 3) {
+        request.transaction?.objectStore('pvpc').clear();
       }
     };
 

@@ -3,7 +3,12 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { expectedHoursInDay, parseOmieCsv, pruneOldPriceFiles } from './update-prices.mjs';
+import {
+  expectedHoursInDay,
+  minimizePVPCPayload,
+  parseOmieCsv,
+  pruneOldPriceFiles,
+} from './update-prices.mjs';
 
 describe('scheduled price ingestion', () => {
   it('accepts regular 24-period OMIE days and converts EUR/MWh to hundredths', () => {
@@ -58,6 +63,35 @@ describe('scheduled price ingestion', () => {
       () => parseOmieCsv('MARGINALPDBC;\n2026;10;24;1;120;120;', '2026-10-24'),
       /OMIE data is incomplete for 2026-10-24\./,
     );
+  });
+
+  it('keeps the PVPC fields used for component-based estimation', () => {
+    const result = minimizePVPCPayload(
+      {
+        PVPC: Array.from({ length: 24 }, (_, hour) => ({
+          Dia: '24/10/2026',
+          Hora: `${String(hour).padStart(2, '0')}-${String(hour + 1).padStart(2, '0')}`,
+          PCB: '228,20',
+          PMHPCB: '236,94',
+          TAHPCB: '-38,76',
+          SAHPCB: '19,59',
+          CYM: '228,20',
+          COF2TD: '0,000101531267000000',
+          unused: 'not copied',
+        })),
+        metadata: { origin: 'ESIOS' },
+      },
+      '2026-10-24',
+    );
+
+    assert.deepEqual(Object.keys(result), ['PVPC']);
+    assert.deepEqual(result.PVPC[0], {
+      Dia: '24/10/2026',
+      Hora: '00-01',
+      PCB: '228,20',
+      PMHPCB: '236,94',
+      TAHPCB: '-38,76',
+    });
   });
 
   it('keeps today and tomorrow prices and removes other daily price files', async () => {

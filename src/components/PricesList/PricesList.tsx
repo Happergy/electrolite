@@ -34,7 +34,7 @@ export const PricesList = () => {
               />
               <time className={styles.time} dateTime={date}>{dayjs(date).format('HH')}h</time>
               <span className={styles.price}>
-                {printPrice(price, true)}
+                {printPrice(price, true, true)}
                 {simulated ? '*' : null}
               </span>
             </span>

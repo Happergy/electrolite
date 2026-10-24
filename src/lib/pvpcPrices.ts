@@ -3,7 +3,12 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import 'dayjs/locale/es';
 
-import { getCachedPVPC, type PVPCPriceEntry } from './pvpcCache';
+import {
+  getCachedPVPC,
+  PVPC_ADDITIONAL_FIELDS,
+  type PVPCAdditionalField,
+  type PVPCPriceEntry,
+} from './pvpcCache';
 import { normalizePriceDate } from './priceCache';
 
 dayjs.extend(utc);
@@ -100,7 +105,17 @@ export const getPVPC = async (date: string): Promise<PVPCPriceEntry[]> => {
           typeof PCB === 'string' &&
           Number.isFinite(Number.parseFloat(PCB.replace(',', '.'))) &&
           Dia === dayjs.tz(normalizedDate, MADRID_TZ).format('DD/MM/YYYY'),
-      ).map(({ PCB, Dia, Hora }) => ({ Dia, Hora, PCB }));
+      ).map(({ PCB, Dia, Hora, ...additionalData }) => {
+        const entry: PVPCPriceEntry = { Dia, Hora, PCB };
+        for (const field of PVPC_ADDITIONAL_FIELDS) {
+          const value = additionalData[field as PVPCAdditionalField];
+          if (typeof value === 'string') {
+            entry[field] = value;
+          }
+        }
+
+        return entry;
+      });
     },
     (prices) => (isCompletePVPCDay(normalizedDate, prices) ? undefined : INCOMPLETE_DATA_CACHE_TTL),
   );
