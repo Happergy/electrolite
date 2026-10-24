@@ -145,6 +145,31 @@ export const saveThemePreference = async (preference: ThemePreference): Promise<
   });
 };
 
+export const removeThemePreference = async (): Promise<void> => {
+  if (!('indexedDB' in globalThis)) {
+    throw new Error('IndexedDB is not available in this browser.');
+  }
+
+  const database = await openPriceDatabase();
+
+  await new Promise<void>((resolve, reject) => {
+    const transaction = database.transaction(PREFERENCE_STORE_NAME, 'readwrite');
+    transaction.objectStore(PREFERENCE_STORE_NAME).delete('theme');
+    transaction.oncomplete = () => {
+      database.close();
+      resolve();
+    };
+    transaction.onabort = () => {
+      database.close();
+      reject(transaction.error ?? new Error('Unable to remove theme preference'));
+    };
+    transaction.onerror = () => {
+      database.close();
+      reject(transaction.error ?? new Error('Unable to remove theme preference'));
+    };
+  });
+};
+
 export const initializePriceCache = async (): Promise<void> => {
   const database = await openPriceDatabase();
   database.close();

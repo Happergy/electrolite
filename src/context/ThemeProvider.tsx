@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import ThemeContext, { type Theme, type ThemeMode } from './ThemeContext';
-import { getThemePreference, saveThemePreference } from '../lib/priceCache';
+import {
+  getThemePreference,
+  removeThemePreference,
+  saveThemePreference,
+} from '../lib/priceCache';
 
 const getSystemTheme = (): Theme =>
   window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -11,6 +15,7 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const theme = preference === 'system' ? systemTheme : preference;
+  const showSystemThemeButton = preference !== 'system' && preference !== systemTheme;
 
   useEffect(() => {
     let isMounted = true;
@@ -24,7 +29,7 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
       .catch((storageError: unknown) => {
         console.error('Unable to load the saved theme preference.', storageError);
         if (isMounted) {
-          setError('No se pudo cargar la preferencia de tema guardada.');
+          setError('No s’ha pogut carregar la preferència de tema desada.');
         }
       })
       .finally(() => {
@@ -68,13 +73,24 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
       setError(null);
     } catch (storageError) {
       console.error('Unable to save the theme preference.', storageError);
-      setError('No se pudo guardar la preferencia de tema.');
+      setError('No s’ha pogut desar la preferència de tema.');
     }
   }, [theme]);
 
+  const useSystemTheme = useCallback(async () => {
+    try {
+      await removeThemePreference();
+      setPreference('system');
+      setError(null);
+    } catch (storageError) {
+      console.error('Unable to remove the saved theme preference.', storageError);
+      setError('No s’ha pogut eliminar la preferència de tema desada.');
+    }
+  }, []);
+
   const value = useMemo(
-    () => ({ theme, isReady, error, toggleTheme }),
-    [theme, isReady, error, toggleTheme],
+    () => ({ theme, showSystemThemeButton, isReady, error, toggleTheme, useSystemTheme }),
+    [theme, showSystemThemeButton, isReady, error, toggleTheme, useSystemTheme],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

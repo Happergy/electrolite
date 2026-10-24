@@ -6,9 +6,11 @@ export type ThemeMode = Theme | 'system';
 
 type ThemeContextValue = {
   theme: Theme;
+  showSystemThemeButton: boolean;
   isReady: boolean;
   error: string | null;
   toggleTheme: () => Promise<void>;
+  useSystemTheme: () => Promise<void>;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);

@@ -7,7 +7,14 @@ import styles from './Main.module.css';
 
 function Main() {
   const { error } = usePricesContext();
-  const { theme, isReady, error: themeError, toggleTheme } = useTheme();
+  const {
+    theme,
+    showSystemThemeButton,
+    isReady,
+    error: themeError,
+    toggleTheme,
+    useSystemTheme,
+  } = useTheme();
 
   return (
     <>
@@ -25,11 +32,22 @@ function Main() {
           type="button"
           onClick={() => void toggleTheme()}
           disabled={!isReady}
-          aria-label={`Activar modo ${theme === 'dark' ? 'claro' : 'oscuro'}`}
+          aria-label={`${theme === 'dark' ? '☀️ Activa el mode clar' : '🌙 Activa el mode fosc'}`}
           aria-pressed={theme === 'dark'}
         >
-          {theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+          {theme === 'dark' ? '☀️ Clar' : '🌙 Fosc'}
         </button>
+        {showSystemThemeButton && (
+          <button
+            className={styles.themeToggle}
+            type="button"
+            onClick={() => void useSystemTheme()}
+            disabled={!isReady}
+            aria-label="⚙️ Fes servir el tema del sistema"
+          >
+            ⚙️ Sistema
+          </button>
+        )}
       </div>
     </>
   );
