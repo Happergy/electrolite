@@ -2,6 +2,40 @@
     margin-top: 1rem;
 }
 
+.pageToolbar {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+    max-width: 30rem;
+}
+
+.themeToggle {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--black);
+    cursor: pointer;
+    font: inherit;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.themeToggle:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.themeToggle:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.themeError {
+    color: var(--tomato);
+    margin: 0.5rem auto;
+    max-width: 30rem;
+}
+
 .pricesToolbar {
     align-items: center;
     display: flex;

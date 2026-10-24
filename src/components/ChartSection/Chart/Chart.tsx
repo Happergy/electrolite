@@ -14,6 +14,7 @@ import dayjs from 'dayjs';
 import { Line } from 'react-chartjs-2';
 import { formatPrice } from '../../../lib/price';
 import { useColors } from '../../../hooks/useColors';
+import useTheme from '../../../hooks/useTheme';
 import { usePricesContext } from '../../../context/PricesContext';
 import { BG_COLORS, LINE_COLORS } from '../../../domain/colors';
 
@@ -24,6 +25,7 @@ ChartJS.register(LineElement, PointElement, LinearScale, Title, CategoryScale, F
 function Chart() {
   const { chartPrices, bestPrice, avgPrice } = usePricesContext();
   const { color: currentColor, getColor } = useColors();
+  const { theme } = useTheme();
   const isProvisionalPricesAvailable = useRef(false);
   const today = dayjs().format('YYYY-MM-DD');
   const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
@@ -145,7 +147,7 @@ function Chart() {
         borderDash: [4, 2],
         data: [...nextPrices.map(() => getChartValue(chartAverage)), getChartValue(chartAverage)], // all with same value
         backgroundColor: 'transparent',
-        borderColor: '#999',
+        borderColor: theme === 'dark' ? '#aebcbe' : '#999',
         pointRadius: 0,
       },
     ],
@@ -157,9 +159,23 @@ function Chart() {
     animation: false,
     maintainAspectRatio: false,
     scales: {
+      x: {
+        grid: {
+          color: theme === 'dark' ? 'rgba(241, 245, 244, 0.12)' : 'rgba(0, 0, 0, 0.1)',
+        },
+        ticks: {
+          color: theme === 'dark' ? '#aebcbe' : '#666',
+        },
+      },
       y: {
         min: 0,
         max,
+        grid: {
+          color: theme === 'dark' ? 'rgba(241, 245, 244, 0.12)' : 'rgba(0, 0, 0, 0.1)',
+        },
+        ticks: {
+          color: theme === 'dark' ? '#aebcbe' : '#666',
+        },
       },
     },
     interaction: {

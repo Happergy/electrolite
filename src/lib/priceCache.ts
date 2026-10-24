@@ -7,10 +7,12 @@ dayjs.extend(timezone);
 
 const MADRID_TZ = 'Europe/Madrid';
 const DATABASE_NAME = 'electralite-pvpc';
-const DATABASE_VERSION = 3;
+const DATABASE_VERSION = 4;
 const STORE_NAMES = ['pvpc', 'omie'] as const;
+const PREFERENCE_STORE_NAME = 'preferences';
 
 export type PriceSource = (typeof STORE_NAMES)[number];
+export type ThemePreference = 'light' | 'dark';
 
 type CachedPriceData<T> = {
   date: string;
@@ -65,14 +67,83 @@ const openPriceDatabase = (): Promise<IDBDatabase> =>
         }
       }
 
+      if (!database.objectStoreNames.contains(PREFERENCE_STORE_NAME)) {
+        database.createObjectStore(PREFERENCE_STORE_NAME, { keyPath: 'key' });
+      }
+
       if (event.oldVersion < 3) {
         request.transaction?.objectStore('pvpc').clear();
       }
     };
 
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      request.result.onversionchange = () => request.result.close();
+      resolve(request.result);
+    };
     request.onerror = () => reject(request.error ?? new Error('Unable to open price cache'));
   });
+
+export const getThemePreference = async (): Promise<ThemePreference | null> => {
+  if (!('indexedDB' in globalThis)) {
+    throw new Error('IndexedDB is not available in this browser.');
+  }
+
+  const database = await openPriceDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(PREFERENCE_STORE_NAME, 'readonly');
+    const request = transaction.objectStore(PREFERENCE_STORE_NAME).get('theme');
+    let preference: ThemePreference | null = null;
+
+    request.onsuccess = () => {
+      const value = request.result?.value;
+      if (value === 'light' || value === 'dark') {
+        preference = value;
+      }
+    };
+    request.onerror = () => {
+      database.close();
+      reject(request.error ?? new Error('Unable to read theme preference'));
+    };
+    transaction.oncomplete = () => {
+      database.close();
+      resolve(preference);
+    };
+    transaction.onabort = () => {
+      database.close();
+      reject(transaction.error ?? new Error('Unable to read theme preference'));
+    };
+    transaction.onerror = () => {
+      database.close();
+      reject(transaction.error ?? new Error('Unable to read theme preference'));
+    };
+  });
+};
+
+export const saveThemePreference = async (preference: ThemePreference): Promise<void> => {
+  if (!('indexedDB' in globalThis)) {
+    throw new Error('IndexedDB is not available in this browser.');
+  }
+
+  const database = await openPriceDatabase();
+
+  await new Promise<void>((resolve, reject) => {
+    const transaction = database.transaction(PREFERENCE_STORE_NAME, 'readwrite');
+    transaction.objectStore(PREFERENCE_STORE_NAME).put({ key: 'theme', value: preference });
+    transaction.oncomplete = () => {
+      database.close();
+      resolve();
+    };
+    transaction.onabort = () => {
+      database.close();
+      reject(transaction.error ?? new Error('Unable to save theme preference'));
+    };
+    transaction.onerror = () => {
+      database.close();
+      reject(transaction.error ?? new Error('Unable to save theme preference'));
+    };
+  });
+};
 
 export const initializePriceCache = async (): Promise<void> => {
   const database = await openPriceDatabase();
