@@ -26,7 +26,7 @@ export const PricesProvider = ({ children }: PropsWithChildren) => {
         return () => window.clearTimeout(refreshTimer);
     }, []);
 
-    const nextPrices = prices.slice(0, 24);
+    const nextPrices = prices;
     const avgPrice = nextPrices.reduce((sum, price) => sum + price.price, 0) / (nextPrices.length || 1);
     const validPrices = nextPrices.filter(({ price }) => Number.isFinite(price));
     const firstPrice = validPrices[0] || { price: 0, date: '' };
