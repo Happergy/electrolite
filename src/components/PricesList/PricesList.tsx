@@ -1,25 +1,22 @@
 import dayjs from 'dayjs';
 import { usePricesContext } from '../../context/PricesContext';
 import { LINE_COLORS } from '../../domain/colors';
-import { COLORS, useColors } from '../../hooks/useColors';
-import { printPrice } from '../../lib/price';
+import { getPriceMarkerShape } from '../../domain/priceMarker';
+import { useColors } from '../../hooks/useColors';
+import { formatPrice, printPrice } from '../../lib/price';
 
 import styles from './PricesList.module.css';
 
 export const PricesList = () => {
-  const { prices } = usePricesContext();
+  const { prices, bestPrice } = usePricesContext();
   const { getColor } = useColors();
 
   return (
     <ol className={styles.list}>
       {prices?.map(({ price, date, simulated }) => {
         const priceColor = getColor(price);
-        const priceShape =
-          priceColor === COLORS.GREEN
-            ? styles.bestPrice
-            : priceColor === COLORS.RED
-              ? styles.worstPrice
-              : '';
+        const isBestPrice = formatPrice(price) === formatPrice(bestPrice.price);
+        const priceShape = styles[getPriceMarkerShape(priceColor, isBestPrice)];
 
         return (
           <li key={date} className={styles.item}>

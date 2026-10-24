@@ -17,6 +17,7 @@ import { useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import { usePricesContext } from '../../../context/PricesContext';
 import { BG_COLORS, LINE_COLORS } from '../../../domain/colors';
+import { getPriceMarkerShape } from '../../../domain/priceMarker';
 import { useColors } from '../../../hooks/useColors';
 import useTheme from '../../../hooks/useTheme';
 import { formatPrice } from '../../../lib/price';
@@ -64,7 +65,6 @@ function Chart() {
    * @returns {boolean}
    */
   const isBestPrice = (value: unknown, dataIndex: number, length: number) =>
-    dataIndex > 0 &&
     dataIndex < length - 1 &&
     typeof value === 'number' &&
     value === getChartValue(bestPrice.price);
@@ -96,11 +96,10 @@ function Chart() {
 
   const pointStyle = (context: ScriptableContext<'line'>) => {
     const value = getValue(context);
-    const BEST_POINT = 'crossRot';
-    const DEFAULT_POINT = 'circle';
-    return isBestPrice(value, context.dataIndex, context.dataset.data.length)
-      ? BEST_POINT
-      : DEFAULT_POINT;
+    return getPriceMarkerShape(
+      typeof value === 'number' ? getColor(value) : 'yellow',
+      isBestPrice(value, context.dataIndex, context.dataset.data.length),
+    );
   };
 
   const getChartData = () => {

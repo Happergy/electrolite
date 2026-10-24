@@ -29,34 +29,40 @@
   border-radius: 2px;
 }
 
-.bestPrice {
-  position: relative;
-  box-shadow:
-    0 0 0 3px var(--pure-white),
-    0 0 0 4px var(--legend-outline);
-}
-
-.bestPrice::before,
-.bestPrice::after {
-  position: absolute;
-  top: 2px;
-  left: 8px;
-  width: 2px;
-  height: 12px;
-  background: var(--legend-outline);
-  content: "";
-}
-
-.bestPrice::before {
+.crossRot {
+  border: 0;
+  border-radius: 0;
   transform: rotate(45deg);
+  clip-path: polygon(
+    35% 0,
+    65% 0,
+    65% 35%,
+    100% 35%,
+    100% 65%,
+    65% 65%,
+    65% 100%,
+    35% 100%,
+    35% 65%,
+    0 65%,
+    0 35%,
+    35% 35%
+  );
+  filter: drop-shadow(0 0 2px var(--pure-white))
+    drop-shadow(0 0 1px var(--legend-outline));
 }
 
-.bestPrice::after {
-  transform: rotate(-45deg);
+.circle {
+  border-radius: 50%;
 }
 
-.worstPrice {
-  transform: rotate(45deg);
+.triangle {
+  border: 0;
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.rect {
+  border-radius: 0;
 }
 
 .price {
