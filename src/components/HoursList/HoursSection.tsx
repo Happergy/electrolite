@@ -7,19 +7,23 @@ function HoursSection({
   startTime,
   endTime,
   duration,
-  isBestPrice,
 }: {
   startTime: string;
   endTime: string;
   duration: number;
   showStartTime?: boolean;
-  isBestPrice?: boolean;
 }) {
   const now = dayjs().minute(0).second(0);
   const [isShowingStartTime, setIsShowingStartTime] = useState(true);
   const startDayJs = dayjs(new Date(startTime));
-  const diffStartDayWithNow = parseInt(startDayJs.diff(now, 'hour').toString(), 10);
-  const minutesDiffStartDayWithNow = parseInt(startDayJs.diff(now, 'minutes').toString(), 10);
+  const diffStartDayWithNow = parseInt(
+    startDayJs.diff(now, 'hour').toString(),
+    10,
+  );
+  const minutesDiffStartDayWithNow = parseInt(
+    startDayJs.diff(now, 'minutes').toString(),
+    10,
+  );
   const remainingHours =
     diffStartDayWithNow === 0 && minutesDiffStartDayWithNow !== 59
       ? diffStartDayWithNow
@@ -34,7 +38,6 @@ function HoursSection({
   const renderRemainingHours = (hours: number) =>
     remainingHours <= 24 ? hours : `1 dia i ${hours - 24}`;
 
-
   return isValidDate ? (
     <>
       <div className={styles.hours}>
@@ -42,25 +45,25 @@ function HoursSection({
         <span className={styles.separator}>{' - '}</span>
         <time dateTime={endTime}>{end}</time>
       </div>
-      {
-        !remainingHours ? (
-          <span className={styles.remaining}>Ara</span>
-        ) : (
-          <button
-            type="button"
-            className={styles.wrapper}
-            onClick={() => setIsShowingStartTime((current) => !current)}
-            aria-pressed={isShowingStartTime}
-          >
-            <p className={styles.remaining}>
-              <span>{isShowingStartTime ? 'Falten' : 'Acaba en'}</span>
-              <span className="highlight">{` ${isShowingStartTime
+      {!remainingHours ? (
+        <span className={styles.remaining}>Ara</span>
+      ) : (
+        <button
+          type="button"
+          className={styles.wrapper}
+          onClick={() => setIsShowingStartTime((current) => !current)}
+          aria-pressed={isShowingStartTime}
+        >
+          <p className={styles.remaining}>
+            <span>{isShowingStartTime ? 'Falten' : 'Acaba en'}</span>
+            <span className="highlight">{` ${
+              isShowingStartTime
                 ? renderRemainingHours(remainingHours)
                 : renderRemainingHours(remainingHours + duration)
-                }h`}</span>
-            </p>
-          </button>
-        )}
+            }h`}</span>
+          </p>
+        </button>
+      )}
     </>
   ) : (
     <div className={styles.loader}>&nbsp;</div>

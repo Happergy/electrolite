@@ -10,7 +10,7 @@ type ThemeContextValue = {
   isReady: boolean;
   error: string | null;
   toggleTheme: () => Promise<void>;
-  useSystemTheme: () => Promise<void>;
+  setThemeToSystem: () => Promise<void>;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);

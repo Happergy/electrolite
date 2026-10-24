@@ -1,7 +1,7 @@
 /// <reference types="jest" />
 
-import type { PVPCPriceEntry } from './pvpcCache';
 import type { OmiePrice } from './omie';
+import type { PVPCPriceEntry } from './pvpcCache';
 import { estimatePVPCPrices } from './pvpcEstimate';
 import { getExpectedPVPCHours } from './pvpcPrices';
 
@@ -51,10 +51,12 @@ describe('estimatePVPCPrices', () => {
       { date: '2026-10-12T01:00:00+02:00', price: 5000 },
     ];
 
-    expect(estimatePVPCPrices(componentPrices, previousOMIE, nextOMIE)).toEqual([
-      { date: '2026-10-12T00:00:00+02:00', price: 18625, simulated: true },
-      { date: '2026-10-12T01:00:00+02:00', price: 5625, simulated: true },
-    ]);
+    expect(estimatePVPCPrices(componentPrices, previousOMIE, nextOMIE)).toEqual(
+      [
+        { date: '2026-10-12T00:00:00+02:00', price: 18625, simulated: true },
+        { date: '2026-10-12T01:00:00+02:00', price: 5625, simulated: true },
+      ],
+    );
   });
 
   it('rejects incomplete reference data', () => {

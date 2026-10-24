@@ -4,7 +4,7 @@
   border: 0;
   color: var(--black);
   padding: 0;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
   margin: 0;
 }
 
@@ -14,7 +14,7 @@
   font-size: 1rem;
   justify-content: space-between;
   font-variant-numeric: tabular-nums;
-  font-family: 'MontserratBold', Arial, Helvetica, sans-serif;
+  font-family: "MontserratBold", Arial, Helvetica, sans-serif;
 }
 
 .remaining {

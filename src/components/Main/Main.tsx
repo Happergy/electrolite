@@ -1,7 +1,7 @@
-import HoursList from '../HoursList/HoursList';
-import { ChartCard } from '../ChartSection/ChartCard/ChartCard';
 import { usePricesContext } from '../../context/PricesContext';
 import useTheme from '../../hooks/useTheme';
+import { ChartCard } from '../ChartSection/ChartCard/ChartCard';
+import HoursList from '../HoursList/HoursList';
 
 import styles from './Main.module.css';
 
@@ -13,7 +13,7 @@ function Main() {
     isReady,
     error: themeError,
     toggleTheme,
-    useSystemTheme,
+    setThemeToSystem,
   } = useTheme();
 
   return (
@@ -26,7 +26,11 @@ function Main() {
         <ChartCard />
       </section>
       <div className={styles.pageToolbar}>
-        {themeError && <p className={styles.themeError} role="alert">{themeError}</p>}
+        {themeError && (
+          <p className={styles.themeError} role="alert">
+            {themeError}
+          </p>
+        )}
         <button
           className={styles.themeToggle}
           type="button"
@@ -41,7 +45,7 @@ function Main() {
           <button
             className={styles.themeToggle}
             type="button"
-            onClick={() => void useSystemTheme()}
+            onClick={() => void setThemeToSystem()}
             disabled={!isReady}
             aria-label="⚙️ Fes servir el tema del sistema"
           >

@@ -2,7 +2,8 @@
 
 import { getOmie } from './omie';
 
-const formatHour = (hour: number): string => (hour < 10 ? `0${hour}` : String(hour));
+const formatHour = (hour: number): string =>
+  hour < 10 ? `0${hour}` : String(hour);
 
 const mockResponse = (status: number, body: unknown): Response =>
   ({
@@ -16,7 +17,10 @@ const installFetchMock = (...responses: Response[]) => {
   for (const response of responses) {
     fetchMock.mockResolvedValueOnce(response);
   }
-  Object.defineProperty(globalThis, 'fetch', { configurable: true, value: fetchMock });
+  Object.defineProperty(globalThis, 'fetch', {
+    configurable: true,
+    value: fetchMock,
+  });
   return fetchMock;
 };
 
@@ -36,16 +40,22 @@ describe('getOmie local daily JSON', () => {
 
     expect(prices).toEqual(githubPrices);
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(String(fetchMock.mock.calls[0][0])).toBe('prices/20261012-omie.json');
+    expect(String(fetchMock.mock.calls[0][0])).toBe(
+      'prices/20261012-omie.json',
+    );
   });
 
   it('does not query OMIE directly when the local daily file is missing', async () => {
     const fetchMock = installFetchMock(mockResponse(404, null));
 
-    await expect(getOmie('2026-10-13')).rejects.toThrow('OMIE returned no hourly prices for 20261013');
+    await expect(getOmie('2026-10-13')).rejects.toThrow(
+      'OMIE returned no hourly prices for 20261013',
+    );
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(String(fetchMock.mock.calls[0][0])).toBe('prices/20261013-omie.json');
+    expect(String(fetchMock.mock.calls[0][0])).toBe(
+      'prices/20261013-omie.json',
+    );
   });
 
   it('does not query OMIE directly when the local day is incomplete', async () => {
@@ -55,9 +65,13 @@ describe('getOmie local daily JSON', () => {
     }));
     const fetchMock = installFetchMock(mockResponse(200, incompletePrices));
 
-    await expect(getOmie('2026-10-14')).rejects.toThrow('OMIE returned no hourly prices for 20261014');
+    await expect(getOmie('2026-10-14')).rejects.toThrow(
+      'OMIE returned no hourly prices for 20261014',
+    );
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(String(fetchMock.mock.calls[0][0])).toBe('prices/20261014-omie.json');
+    expect(String(fetchMock.mock.calls[0][0])).toBe(
+      'prices/20261014-omie.json',
+    );
   });
 });

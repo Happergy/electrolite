@@ -1,8 +1,6 @@
-import HoursSection from './HoursSection';
-import { printPrice } from '../../lib/price';
 import { usePricesContext } from '../../context/PricesContext';
-
 import styles from './HoursList.module.css';
+import HoursSection from './HoursSection';
 
 const WINDOW_DURATIONS = [1, 2, 3, 4, 5, 6];
 
@@ -19,7 +17,6 @@ function HoursList() {
             <li className={styles.window} key={duration}>
               <div className={styles.info}>{duration} h</div>
               <HoursSection
-                isBestPrice
                 startTime={window.startTime}
                 endTime={window.endTime}
                 duration={duration}

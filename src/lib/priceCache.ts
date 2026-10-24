@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -80,7 +80,8 @@ const openPriceDatabase = (): Promise<IDBDatabase> =>
       request.result.onversionchange = () => request.result.close();
       resolve(request.result);
     };
-    request.onerror = () => reject(request.error ?? new Error('Unable to open price cache'));
+    request.onerror = () =>
+      reject(request.error ?? new Error('Unable to open price cache'));
   });
 
 export const getThemePreference = async (): Promise<ThemePreference | null> => {
@@ -120,7 +121,9 @@ export const getThemePreference = async (): Promise<ThemePreference | null> => {
   });
 };
 
-export const saveThemePreference = async (preference: ThemePreference): Promise<void> => {
+export const saveThemePreference = async (
+  preference: ThemePreference,
+): Promise<void> => {
   if (!('indexedDB' in globalThis)) {
     throw new Error('IndexedDB is not available in this browser.');
   }
@@ -128,8 +131,13 @@ export const saveThemePreference = async (preference: ThemePreference): Promise<
   const database = await openPriceDatabase();
 
   await new Promise<void>((resolve, reject) => {
-    const transaction = database.transaction(PREFERENCE_STORE_NAME, 'readwrite');
-    transaction.objectStore(PREFERENCE_STORE_NAME).put({ key: 'theme', value: preference });
+    const transaction = database.transaction(
+      PREFERENCE_STORE_NAME,
+      'readwrite',
+    );
+    transaction
+      .objectStore(PREFERENCE_STORE_NAME)
+      .put({ key: 'theme', value: preference });
     transaction.oncomplete = () => {
       database.close();
       resolve();
@@ -153,7 +161,10 @@ export const removeThemePreference = async (): Promise<void> => {
   const database = await openPriceDatabase();
 
   await new Promise<void>((resolve, reject) => {
-    const transaction = database.transaction(PREFERENCE_STORE_NAME, 'readwrite');
+    const transaction = database.transaction(
+      PREFERENCE_STORE_NAME,
+      'readwrite',
+    );
     transaction.objectStore(PREFERENCE_STORE_NAME).delete('theme');
     transaction.oncomplete = () => {
       database.close();
@@ -161,11 +172,15 @@ export const removeThemePreference = async (): Promise<void> => {
     };
     transaction.onabort = () => {
       database.close();
-      reject(transaction.error ?? new Error('Unable to remove theme preference'));
+      reject(
+        transaction.error ?? new Error('Unable to remove theme preference'),
+      );
     };
     transaction.onerror = () => {
       database.close();
-      reject(transaction.error ?? new Error('Unable to remove theme preference'));
+      reject(
+        transaction.error ?? new Error('Unable to remove theme preference'),
+      );
     };
   });
 };
@@ -175,7 +190,10 @@ export const initializePriceCache = async (): Promise<void> => {
   database.close();
 };
 
-const readPriceData = async <T>(source: PriceSource, date: string): Promise<T[] | null> => {
+const readPriceData = async <T>(
+  source: PriceSource,
+  date: string,
+): Promise<T[] | null> => {
   if (!('indexedDB' in globalThis)) {
     return null;
   }
@@ -198,7 +216,8 @@ const readPriceData = async <T>(source: PriceSource, date: string): Promise<T[] 
       }
     };
 
-    request.onerror = () => reject(request.error ?? new Error(`Unable to read ${source} cache`));
+    request.onerror = () =>
+      reject(request.error ?? new Error(`Unable to read ${source} cache`));
     transaction.oncomplete = () => {
       database.close();
       resolve(data);
@@ -250,11 +269,17 @@ const savePriceData = async <T>(
   });
 };
 
-const readPriceDataSafely = async <T>(source: PriceSource, date: string): Promise<T[] | null> => {
+const readPriceDataSafely = async <T>(
+  source: PriceSource,
+  date: string,
+): Promise<T[] | null> => {
   try {
     return await readPriceData<T>(source, date);
   } catch (error) {
-    console.warn(`Unable to read ${source} price cache; using the network.`, error);
+    console.warn(
+      `Unable to read ${source} price cache; using the network.`,
+      error,
+    );
     return null;
   }
 };
@@ -279,13 +304,17 @@ export const getCachedPriceData = async <T>(
   }
 
   const fetchAndCache = async (): Promise<T[]> => {
-    const cachedAfterLock = await readPriceDataSafely<T>(source, normalizedDate);
+    const cachedAfterLock = await readPriceDataSafely<T>(
+      source,
+      normalizedDate,
+    );
     if (cachedAfterLock !== null) {
       return cachedAfterLock;
     }
 
     const data = await load();
-    const ttl = data.length === 0 ? options.negativeTTL : options.maxAge?.(data);
+    const ttl =
+      data.length === 0 ? options.negativeTTL : options.maxAge?.(data);
 
     try {
       await savePriceData(source, normalizedDate, data, ttl);
@@ -298,7 +327,11 @@ export const getCachedPriceData = async <T>(
 
   const request =
     typeof navigator !== 'undefined' && navigator.locks
-      ? navigator.locks.request(`electralite:${cacheKey}`, { mode: 'exclusive' }, fetchAndCache)
+      ? navigator.locks.request(
+          `electralite:${cacheKey}`,
+          { mode: 'exclusive' },
+          fetchAndCache,
+        )
       : fetchAndCache();
   const trackedRequest = request.then(
     (data) => {

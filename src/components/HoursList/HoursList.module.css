@@ -1,26 +1,26 @@
 .windows {
-    display: flex;
-    list-style-position: inside;
-    margin: 0 auto;
-    flex-direction: column;
-    max-width: 30rem;
-    color: var(--pure-black);
+  display: flex;
+  list-style-position: inside;
+  margin: 0 auto;
+  flex-direction: column;
+  max-width: 30rem;
+  color: var(--pure-black);
 }
 
 .window {
-    display: flex;
-    flex-direction: row;
-    margin: 0;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.6rem 1rem;
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
 }
 
-.window+.window {
-    border-top: 1px solid var(--border);
+.window + .window {
+  border-top: 1px solid var(--border);
 }
 
 .info {
-    font-family: 'MontserratBold', Arial, Helvetica, sans-serif;
+  font-family: "MontserratBold", Arial, Helvetica, sans-serif;
 }

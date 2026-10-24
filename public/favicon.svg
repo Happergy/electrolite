@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Happergy</title>
   <rect width="512" height="512" fill="#153e43"/>
   <path d="M205 108v60m102-60v60" fill="none" stroke="#f5f2de" stroke-linecap="round" stroke-width="30"/>
   <rect x="144" y="154" width="224" height="208" rx="54" fill="#f5f2de"/>

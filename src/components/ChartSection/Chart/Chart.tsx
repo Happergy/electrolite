@@ -1,27 +1,37 @@
-import { useRef } from 'react';
-
 import {
   CategoryScale,
+  type ChartData,
   Chart as ChartJS,
+  type ChartOptions,
   Filler,
-  LineElement,
   LinearScale,
-  PointElement,
+  LineElement,
   type Plugin,
+  PointElement,
+  type ScriptableContext,
   Title,
   Tooltip,
 } from 'chart.js';
 import dayjs from 'dayjs';
+import { useRef } from 'react';
 import { Line } from 'react-chartjs-2';
-import { formatPrice } from '../../../lib/price';
-import { useColors } from '../../../hooks/useColors';
-import useTheme from '../../../hooks/useTheme';
 import { usePricesContext } from '../../../context/PricesContext';
 import { BG_COLORS, LINE_COLORS } from '../../../domain/colors';
+import { useColors } from '../../../hooks/useColors';
+import useTheme from '../../../hooks/useTheme';
+import { formatPrice } from '../../../lib/price';
 
 import styles from './Chart.module.css';
 
-ChartJS.register(LineElement, PointElement, LinearScale, Title, CategoryScale, Filler, Tooltip);
+ChartJS.register(
+  LineElement,
+  PointElement,
+  LinearScale,
+  Title,
+  CategoryScale,
+  Filler,
+  Tooltip,
+);
 
 function Chart() {
   const { chartPrices, bestPrice, avgPrice } = usePricesContext();
@@ -37,12 +47,14 @@ function Chart() {
     }) || [];
   const chartAverage =
     nextPrices.length > 0
-      ? nextPrices.reduce((sum, { price }) => sum + price, 0) / nextPrices.length
+      ? nextPrices.reduce((sum, { price }) => sum + price, 0) /
+        nextPrices.length
       : avgPrice;
 
   const formatDate = (date: string) => `${dayjs(date).format('HH')}h`;
   const getChartValue = (price: number) => Math.max(0, formatPrice(price));
-  const getValue = (dataIndex: number, dataset) => dataset.data[dataIndex];
+  const getValue = ({ dataIndex, dataset }: ScriptableContext<'line'>) =>
+    dataset.data[dataIndex];
 
   /**
    * Special case has different styling (current price, max, min)
@@ -51,35 +63,44 @@ function Chart() {
    * @param {number} length
    * @returns {boolean}
    */
-  const isBestPrice = (value: string, dataIndex: number, length: number) =>
-    dataIndex &&
+  const isBestPrice = (value: unknown, dataIndex: number, length: number) =>
+    dataIndex > 0 &&
     dataIndex < length - 1 &&
+    typeof value === 'number' &&
     value === getChartValue(bestPrice.price);
 
-  const pointBorderColor = ({ dataIndex, dataset }: { dataIndex: number; dataset: any }) => {
-    const value = getValue(dataIndex, dataset);
-    return LINE_COLORS[getColor(value)];
+  const pointBorderColor = (context: ScriptableContext<'line'>) => {
+    const value = getValue(context);
+    return typeof value === 'number'
+      ? LINE_COLORS[getColor(value)]
+      : BG_COLORS.grey;
   };
 
-  const pointRadius = ({ dataIndex, dataset }: { dataIndex: number; dataset: any }) => {
-    const value = getValue(dataIndex, dataset);
+  const pointRadius = (context: ScriptableContext<'line'>) => {
+    const value = getValue(context);
     const BEST_POINT = 6;
     const DEFAULT_POINT = 3;
-    return isBestPrice(value, dataIndex, dataset.data.length) ? BEST_POINT : DEFAULT_POINT;
+    return isBestPrice(value, context.dataIndex, context.dataset.data.length)
+      ? BEST_POINT
+      : DEFAULT_POINT;
   };
 
-  const pointBorderWidth = ({ dataIndex, dataset }: { dataIndex: number; dataset: any }) => {
-    const value = getValue(dataIndex, dataset);
+  const pointBorderWidth = (context: ScriptableContext<'line'>) => {
+    const value = getValue(context);
     const BEST_POINT = 2;
     const DEFAULT_POINT = 2;
-    return isBestPrice(value, dataIndex, dataset.data.length) ? BEST_POINT : DEFAULT_POINT;
+    return isBestPrice(value, context.dataIndex, context.dataset.data.length)
+      ? BEST_POINT
+      : DEFAULT_POINT;
   };
 
-  const pointStyle = ({ dataIndex, dataset }: { dataIndex: number; dataset: any }) => {
-    const value = getValue(dataIndex, dataset);
+  const pointStyle = (context: ScriptableContext<'line'>) => {
+    const value = getValue(context);
     const BEST_POINT = 'crossRot';
     const DEFAULT_POINT = 'circle';
-    return isBestPrice(value, dataIndex, dataset.data.length) ? BEST_POINT : DEFAULT_POINT;
+    return isBestPrice(value, context.dataIndex, context.dataset.data.length)
+      ? BEST_POINT
+      : DEFAULT_POINT;
   };
 
   const getChartData = () => {
@@ -121,21 +142,40 @@ function Chart() {
       const baseline = chartArea.bottom;
       ctx.save();
       ctx.beginPath();
-      ctx.rect(chartArea.left, chartArea.top, chartArea.width, chartArea.height);
+      ctx.rect(
+        chartArea.left,
+        chartArea.top,
+        chartArea.width,
+        chartArea.height,
+      );
       ctx.clip();
 
       for (let index = 0; index < meta.data.length - 1; index += 1) {
         const startValue = data[index];
         const endValue = data[index + 1];
-        const start = meta.data[index];
-        const end = meta.data[index + 1];
+        const start = meta.data[index] as PointElement;
+        const end = meta.data[index + 1] as PointElement;
 
-        if (typeof startValue !== 'number' || typeof endValue !== 'number' || start.skip || end.skip) {
+        if (
+          typeof startValue !== 'number' ||
+          typeof endValue !== 'number' ||
+          start.skip ||
+          end.skip
+        ) {
           continue;
         }
 
         const { x: startX, y: startY } = start.getProps(['x', 'y'], true);
         const { x: endX, y: endY } = end.getProps(['x', 'y'], true);
+        if (
+          typeof startX !== 'number' ||
+          typeof startY !== 'number' ||
+          typeof endX !== 'number' ||
+          typeof endY !== 'number'
+        ) {
+          continue;
+        }
+
         const color = nextPrices[index]?.simulated
           ? BG_COLORS.grey
           : BG_COLORS[getColor(startValue)];
@@ -155,11 +195,10 @@ function Chart() {
     },
   };
 
-  const lineData = nextPrices && {
+  const lineData: ChartData<'line'> = {
     labels: [...nextPrices.map(({ date }) => formatDate(date)), '00h'],
     datasets: [
       {
-        datasetIdKey: 'prices',
         label: 'Preu',
         borderColor: BG_COLORS.grey,
         borderWidth: 2,
@@ -173,9 +212,7 @@ function Chart() {
         stepped: 'before',
       },
       {
-        datasetIdKey: 'provisionalPrice',
         label: 'PProvisional',
-        beginAtZero: true,
         backgroundColor: BG_COLORS.grey,
         borderColor: BG_COLORS.grey,
         borderWidth: 2,
@@ -192,7 +229,10 @@ function Chart() {
         label: 'Preu mitjà',
         borderWidth: 2,
         borderDash: [4, 2],
-        data: [...nextPrices.map(() => getChartValue(chartAverage)), getChartValue(chartAverage)], // all with same value
+        data: [
+          ...nextPrices.map(() => getChartValue(chartAverage)),
+          getChartValue(chartAverage),
+        ], // all with same value
         backgroundColor: 'transparent',
         borderColor: theme === 'dark' ? '#aebcbe' : '#999',
         pointRadius: 0,
@@ -200,15 +240,19 @@ function Chart() {
     ],
   };
 
-  const max = Math.max(0, ...nextPrices.map(({ price }) => getChartValue(price))) + 0.03;
+  const max =
+    Math.max(0, ...nextPrices.map(({ price }) => getChartValue(price))) + 0.03;
 
-  const options = {
+  const options: ChartOptions<'line'> = {
     animation: false,
     maintainAspectRatio: false,
     scales: {
       x: {
         grid: {
-          color: theme === 'dark' ? 'rgba(241, 245, 244, 0.12)' : 'rgba(0, 0, 0, 0.1)',
+          color:
+            theme === 'dark'
+              ? 'rgba(241, 245, 244, 0.12)'
+              : 'rgba(0, 0, 0, 0.1)',
         },
         ticks: {
           color: theme === 'dark' ? '#aebcbe' : '#666',
@@ -218,7 +262,10 @@ function Chart() {
         min: 0,
         max,
         grid: {
-          color: theme === 'dark' ? 'rgba(241, 245, 244, 0.12)' : 'rgba(0, 0, 0, 0.1)',
+          color:
+            theme === 'dark'
+              ? 'rgba(241, 245, 244, 0.12)'
+              : 'rgba(0, 0, 0, 0.1)',
         },
         ticks: {
           color: theme === 'dark' ? '#aebcbe' : '#666',
@@ -229,7 +276,9 @@ function Chart() {
       mode: 'index',
     },
     plugins: {
-      legend: false,
+      legend: {
+        display: false,
+      },
       tooltip: {
         position: 'nearest',
       },
@@ -237,13 +286,11 @@ function Chart() {
   };
 
   return (
-    <>
-      <div className={styles.wrapper}>
-        {nextPrices && nextPrices.length > 0 && (
-          <Line data={lineData} options={options} plugins={[areaFillPlugin]} />
-        )}
-      </div>
-    </>
+    <div className={styles.wrapper}>
+      {nextPrices && nextPrices.length > 0 && (
+        <Line data={lineData} options={options} plugins={[areaFillPlugin]} />
+      )}
+    </div>
   );
 }
 

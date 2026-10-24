@@ -1,97 +1,100 @@
 .pricesSection {
-    margin-top: 1rem;
+  margin-top: 1rem;
 }
 
 .pageToolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: center;
-    margin: 0 auto;
-    max-width: 30rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 30rem;
 }
 
 .themeToggle {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--black);
-    cursor: pointer;
-    font: inherit;
-    min-height: 2.75rem;
-    padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--black);
+  cursor: pointer;
+  font: inherit;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .themeToggle:focus-visible {
-    outline: 3px solid var(--accent);
-    outline-offset: 3px;
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .themeToggle:disabled {
-    cursor: wait;
-    opacity: 0.7;
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .themeError {
-    color: var(--tomato);
-    margin: 0.5rem auto;
-    max-width: 30rem;
+  color: var(--tomato);
+  margin: 0.5rem auto;
+  max-width: 30rem;
 }
 
 .pricesToolbar {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    margin: 0 auto 0.65rem;
-    max-width: 30rem;
-    gap: 1rem;
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto 0.65rem;
+  max-width: 30rem;
+  gap: 1rem;
 }
 
 .heading {
-    color: var(--black);
-    font-family: 'MontserratBold', Arial, Helvetica, sans-serif;
-    font-size: 1.05rem;
-    margin: 0;
+  color: var(--black);
+  font-family: "MontserratBold", Arial, Helvetica, sans-serif;
+  font-size: 1.05rem;
+  margin: 0;
 }
 
 .refreshButton {
-    background: var(--secondary);
-    border: 0;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(5, 56, 107, 0.2);
-    color: var(--pure-white);
-    cursor: pointer;
-    display: block;
-    font: inherit;
-    font-family: 'MontserratBold', Arial, Helvetica, sans-serif;
-    margin: 0;
-    min-height: 2.75rem;
-    padding: 0.65rem 1rem;
-    transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  background: var(--secondary);
+  border: 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(5, 56, 107, 0.2);
+  color: var(--pure-white);
+  cursor: pointer;
+  display: block;
+  font: inherit;
+  font-family: "MontserratBold", Arial, Helvetica, sans-serif;
+  margin: 0;
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
 .refreshButton:hover {
-    background: var(--black);
-    box-shadow: 0 3px 7px rgba(5, 56, 107, 0.28);
-    transform: translateY(-1px);
+  background: var(--black);
+  box-shadow: 0 3px 7px rgba(5, 56, 107, 0.28);
+  transform: translateY(-1px);
 }
 
 .refreshButton:focus-visible {
-    outline: 3px solid var(--accent);
-    outline-offset: 3px;
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .refreshButton:active {
-    box-shadow: 0 1px 2px rgba(5, 56, 107, 0.2);
-    transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(5, 56, 107, 0.2);
+  transform: translateY(0);
 }
 
 @media (max-width: 480px) {
-    .pricesToolbar {
-        align-items: flex-start;
-    }
+  .pricesToolbar {
+    align-items: flex-start;
+  }
 
-    .refreshButton {
-        flex-shrink: 0;
-    }
+  .refreshButton {
+    flex-shrink: 0;
+  }
 }

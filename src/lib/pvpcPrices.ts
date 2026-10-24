@@ -1,15 +1,15 @@
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/es';
 
+import { normalizePriceDate } from './priceCache';
 import {
   getCachedPVPC,
   PVPC_ADDITIONAL_FIELDS,
   type PVPCAdditionalField,
   type PVPCPriceEntry,
 } from './pvpcCache';
-import { normalizePriceDate } from './priceCache';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -31,7 +31,12 @@ type PVPCResponse = {
 
 const toInt = (value: string): number => Number.parseInt(value, 10);
 
-const buildPVPCDate = (day: string, month: string, year: string, hour: string): string =>
+const buildPVPCDate = (
+  day: string,
+  month: string,
+  year: string,
+  hour: string,
+): string =>
   dayjs()
     .tz(MADRID_TZ)
     .date(toInt(day))
@@ -47,14 +52,16 @@ export const formatPrice = (price?: string | number | null): number => {
     return 0;
   }
 
-  const normalizedPrice = typeof price === 'number' ? `${price}` : price.replace(',', '.');
+  const normalizedPrice =
+    typeof price === 'number' ? `${price}` : price.replace(',', '.');
   return Math.trunc(Number.parseFloat(normalizedPrice) * 100);
 };
 
 export const formatPriceToSimulate = (price: number): number =>
   Number.parseFloat((price / 100000).toPrecision(4));
 
-export const formatSimulatedPrice = (price: number): number => Math.trunc(price * 100000);
+export const formatSimulatedPrice = (price: number): number =>
+  Math.trunc(price * 100000);
 
 export const getFirstHour = (hour: string): number => toInt(hour.split('-')[0]);
 
@@ -65,10 +72,14 @@ export const getExpectedPVPCHours = (date: string): number => {
   return dayjs.tz(nextDay, MADRID_TZ).startOf('day').diff(start, 'hour');
 };
 
-export const isCompletePVPCDay = (date: string, prices: PVPCPriceEntry[]): boolean =>
-  prices.length === getExpectedPVPCHours(date);
+export const isCompletePVPCDay = (
+  date: string,
+  prices: PVPCPriceEntry[],
+): boolean => prices.length === getExpectedPVPCHours(date);
 
-export const parsePriceDatePVPC = (prices: PVPCPriceEntry[]): PVPCPriceRecord[] =>
+export const parsePriceDatePVPC = (
+  prices: PVPCPriceEntry[],
+): PVPCPriceRecord[] =>
   prices.map(({ PCB, Dia, Hora }) => {
     const [day, month, year] = Dia.split('/');
 
@@ -97,7 +108,9 @@ export const getPVPC = async (date: string): Promise<PVPCPriceEntry[]> => {
 
       const payload = (await response.json()) as PVPCResponse | null;
       if (!Array.isArray(payload?.PVPC)) {
-        throw new Error(`Local PVPC file did not contain a price list: ${fileName}`);
+        throw new Error(
+          `Local PVPC file did not contain a price list: ${fileName}`,
+        );
       }
 
       return payload.PVPC.filter(
@@ -117,6 +130,9 @@ export const getPVPC = async (date: string): Promise<PVPCPriceEntry[]> => {
         return entry;
       });
     },
-    (prices) => (isCompletePVPCDay(normalizedDate, prices) ? undefined : INCOMPLETE_DATA_CACHE_TTL),
+    (prices) =>
+      isCompletePVPCDay(normalizedDate, prices)
+        ? undefined
+        : INCOMPLETE_DATA_CACHE_TTL,
   );
 };

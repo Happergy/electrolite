@@ -47,7 +47,7 @@
   }
 }
 
-:root[data-theme='dark'] {
+:root[data-theme="dark"] {
   color-scheme: dark;
   --green: #a8d47a;
   --yellow: #ffc35b;
@@ -70,7 +70,7 @@
 body {
   background: var(--bg);
   color: var(--black);
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
   font-size: 1rem;
   margin: 8px;
 }
@@ -80,12 +80,12 @@ body {
   margin: 1rem auto 0.7rem;
 }
 
-section+section {
+section + section {
   margin: 1rem 0;
 }
 
 .highlight {
-  font-family: 'MontserratBold', Arial, Helvetica, sans-serif;
+  font-family: "MontserratBold", Arial, Helvetica, sans-serif;
   margin: 0 0.25rem;
 }
 

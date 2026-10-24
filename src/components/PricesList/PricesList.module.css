@@ -31,7 +31,9 @@
 
 .bestPrice {
   position: relative;
-  box-shadow: 0 0 0 3px var(--pure-white), 0 0 0 4px var(--legend-outline);
+  box-shadow:
+    0 0 0 3px var(--pure-white),
+    0 0 0 4px var(--legend-outline);
 }
 
 .bestPrice::before,
@@ -42,7 +44,7 @@
   width: 2px;
   height: 12px;
   background: var(--legend-outline);
-  content: '';
+  content: "";
 }
 
 .bestPrice::before {

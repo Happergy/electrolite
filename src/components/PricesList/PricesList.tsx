@@ -1,8 +1,8 @@
+import dayjs from 'dayjs';
+import { usePricesContext } from '../../context/PricesContext';
 import { LINE_COLORS } from '../../domain/colors';
 import { COLORS, useColors } from '../../hooks/useColors';
 import { printPrice } from '../../lib/price';
-import dayjs from 'dayjs';
-import { usePricesContext } from '../../context/PricesContext';
 
 import styles from './PricesList.module.css';
 
@@ -22,17 +22,16 @@ export const PricesList = () => {
               : '';
 
         return (
-          <li
-            key={date}
-            className={styles.item}
-          >
+          <li key={date} className={styles.item}>
             <span className={styles.container}>
               <span
                 className={`${styles.colorBox} ${priceShape}`}
                 style={{ backgroundColor: LINE_COLORS[priceColor] }}
                 aria-hidden="true"
               />
-              <time className={styles.time} dateTime={date}>{dayjs(date).format('HH')}h</time>
+              <time className={styles.time} dateTime={date}>
+                {dayjs(date).format('HH')}h
+              </time>
               <span className={styles.price}>
                 {printPrice(price, true, true)}
                 {simulated ? '*' : null}

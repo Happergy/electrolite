@@ -1,28 +1,30 @@
 import { createContext, useContext } from 'react';
-import { BestPriceWindow, PriceDetails } from '../types';
+import type { BestPriceWindow, PriceDetails } from '../types';
 
 export type PricesContextValue = {
-    prices: PriceDetails[];
-    chartPrices: PriceDetails[];
-    bestPrice: PriceDetails;
-    worstPrice: PriceDetails;
-    avgPrice: number;
-    loading: boolean;
-    error: Error | null;
-    currentPrice: PriceDetails;
-    bestPrices: Record<number, BestPriceWindow>;
+  prices: PriceDetails[];
+  chartPrices: PriceDetails[];
+  bestPrice: PriceDetails;
+  worstPrice: PriceDetails;
+  avgPrice: number;
+  loading: boolean;
+  error: Error | null;
+  currentPrice: PriceDetails;
+  bestPrices: Record<number, BestPriceWindow>;
 };
 
-export const PricesContext = createContext<PricesContextValue | undefined>(undefined);
+export const PricesContext = createContext<PricesContextValue | undefined>(
+  undefined,
+);
 
 export const usePricesContext = (): PricesContextValue => {
-    const context = useContext(PricesContext);
+  const context = useContext(PricesContext);
 
-    if (!context) {
-        throw new Error('usePricesContext must be used within PricesProvider');
-    }
+  if (!context) {
+    throw new Error('usePricesContext must be used within PricesProvider');
+  }
 
-    return context;
+  return context;
 };
 
 export default PricesContext;

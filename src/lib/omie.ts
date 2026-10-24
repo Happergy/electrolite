@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 
 import { getCachedPriceData, normalizePriceDate } from './priceCache';
 
@@ -44,7 +44,9 @@ export const getOmie = async (date: string | Date): Promise<OmiePrice[]> => {
 
       const dailyPrices: unknown = await response.json();
       if (!Array.isArray(dailyPrices)) {
-        throw new Error(`Local OMIE file did not contain a price list: ${fileName}`);
+        throw new Error(
+          `Local OMIE file did not contain a price list: ${fileName}`,
+        );
       }
 
       const dayPrices = dailyPrices.filter(
@@ -54,13 +56,16 @@ export const getOmie = async (date: string | Date): Promise<OmiePrice[]> => {
           'date' in item &&
           typeof item.date === 'string' &&
           dayjs(item.date).isValid() &&
-          dayjs(item.date).tz(MADRID_TZ).format('YYYY-MM-DD') === requestedDate &&
+          dayjs(item.date).tz(MADRID_TZ).format('YYYY-MM-DD') ===
+            requestedDate &&
           'price' in item &&
           typeof item.price === 'number' &&
           Number.isFinite(item.price),
       );
 
-      return dayPrices.length === getExpectedHoursInDay(requestedDate) ? dayPrices : [];
+      return dayPrices.length === getExpectedHoursInDay(requestedDate)
+        ? dayPrices
+        : [];
     },
     { negativeTTL: NOT_PUBLISHED_CACHE_TTL },
   );

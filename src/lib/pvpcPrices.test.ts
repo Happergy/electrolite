@@ -14,11 +14,15 @@ const installFetchMock = (...responses: Response[]) => {
   for (const response of responses) {
     fetchMock.mockResolvedValueOnce(response);
   }
-  Object.defineProperty(globalThis, 'fetch', { configurable: true, value: fetchMock });
+  Object.defineProperty(globalThis, 'fetch', {
+    configurable: true,
+    value: fetchMock,
+  });
   return fetchMock;
 };
 
-const formatHour = (hour: number): string => (hour < 10 ? `0${hour}` : String(hour));
+const formatHour = (hour: number): string =>
+  hour < 10 ? `0${hour}` : String(hour);
 
 describe('getPVPC local daily JSON', () => {
   afterEach(() => {
@@ -36,9 +40,15 @@ describe('getPVPC local daily JSON', () => {
     const result = await getPVPC('2026-10-12');
 
     expect(result).toHaveLength(24);
-    expect(result[0]).toEqual({ PCB: '120,00', Dia: '12/10/2026', Hora: '00-01' });
+    expect(result[0]).toEqual({
+      PCB: '120,00',
+      Dia: '12/10/2026',
+      Hora: '00-01',
+    });
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(String(fetchMock.mock.calls[0][0])).toBe('prices/20261012-pvpc.json');
+    expect(String(fetchMock.mock.calls[0][0])).toBe(
+      'prices/20261012-pvpc.json',
+    );
   });
 
   it('does not query ESIOS if the local daily file is missing', async () => {
@@ -46,6 +56,8 @@ describe('getPVPC local daily JSON', () => {
 
     expect(await getPVPC('2026-10-12')).toEqual([]);
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(String(fetchMock.mock.calls[0][0])).toBe('prices/20261012-pvpc.json');
+    expect(String(fetchMock.mock.calls[0][0])).toBe(
+      'prices/20261012-pvpc.json',
+    );
   });
 });

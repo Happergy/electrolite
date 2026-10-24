@@ -1,10 +1,16 @@
-import { useCallback, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
-import ThemeContext, { type Theme, type ThemeMode } from './ThemeContext';
+import {
+  type PropsWithChildren,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   getThemePreference,
   removeThemePreference,
   saveThemePreference,
 } from '../lib/priceCache';
+import ThemeContext, { type Theme, type ThemeMode } from './ThemeContext';
 
 const getSystemTheme = (): Theme =>
   window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -15,7 +21,8 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const theme = preference === 'system' ? systemTheme : preference;
-  const showSystemThemeButton = preference !== 'system' && preference !== systemTheme;
+  const showSystemThemeButton =
+    preference !== 'system' && preference !== systemTheme;
 
   useEffect(() => {
     let isMounted = true;
@@ -27,7 +34,10 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
         }
       })
       .catch((storageError: unknown) => {
-        console.error('Unable to load the saved theme preference.', storageError);
+        console.error(
+          'Unable to load the saved theme preference.',
+          storageError,
+        );
         if (isMounted) {
           setError('No s’ha pogut carregar la preferència de tema desada.');
         }
@@ -61,8 +71,13 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
       root.dataset.theme = preference;
     }
 
-    const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    themeColor?.setAttribute('content', theme === 'dark' ? '#121a1c' : '#153e43');
+    const themeColor = document.querySelector<HTMLMetaElement>(
+      'meta[name="theme-color"]',
+    );
+    themeColor?.setAttribute(
+      'content',
+      theme === 'dark' ? '#121a1c' : '#153e43',
+    );
   }, [preference, theme]);
 
   const toggleTheme = useCallback(async () => {
@@ -77,21 +92,40 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
     }
   }, [theme]);
 
-  const useSystemTheme = useCallback(async () => {
+  const setThemeToSystem = useCallback(async () => {
     try {
       await removeThemePreference();
       setPreference('system');
       setError(null);
     } catch (storageError) {
-      console.error('Unable to remove the saved theme preference.', storageError);
+      console.error(
+        'Unable to remove the saved theme preference.',
+        storageError,
+      );
       setError('No s’ha pogut eliminar la preferència de tema desada.');
     }
   }, []);
 
   const value = useMemo(
-    () => ({ theme, showSystemThemeButton, isReady, error, toggleTheme, useSystemTheme }),
-    [theme, showSystemThemeButton, isReady, error, toggleTheme, useSystemTheme],
+    () => ({
+      theme,
+      showSystemThemeButton,
+      isReady,
+      error,
+      toggleTheme,
+      setThemeToSystem,
+    }),
+    [
+      theme,
+      showSystemThemeButton,
+      isReady,
+      error,
+      toggleTheme,
+      setThemeToSystem,
+    ],
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 };

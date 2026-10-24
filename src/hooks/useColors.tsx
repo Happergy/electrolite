@@ -14,7 +14,12 @@ export const useColors = (): {
   getColor: (price: number) => string;
   color: 'red' | 'yellow' | 'green';
 } => {
-  const { bestPrice: summaryBest, worstPrice: summaryWorst, avgPrice: summaryAvg, currentPrice } = usePricesContext();
+  const {
+    bestPrice: summaryBest,
+    worstPrice: summaryWorst,
+    avgPrice: summaryAvg,
+    currentPrice,
+  } = usePricesContext();
 
   const getColor = (targetPrice: number) => {
     if (targetPrice === 0) {

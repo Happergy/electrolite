@@ -1,10 +1,18 @@
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc.js';
-import timezone from 'dayjs/plugin/timezone.js';
-import Papa from 'papaparse';
-import { access, mkdir, readFile, readdir, rename, unlink, writeFile } from 'node:fs/promises';
+import {
+  access,
+  mkdir,
+  readdir,
+  readFile,
+  rename,
+  unlink,
+  writeFile,
+} from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone.js';
+import utc from 'dayjs/plugin/utc.js';
+import Papa from 'papaparse';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -76,7 +84,8 @@ export const parseOmieCsv = (csv, date) => {
     const price = Number.parseFloat(String(item[5] ?? '').replace(',', '.'));
     if (
       ![year, month, day, period, price].every(Number.isFinite) ||
-      `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}` !== date ||
+      `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}` !==
+        date ||
       period < 1
     ) {
       return [];
@@ -141,8 +150,14 @@ const writeJSON = async (path, value) => {
   await rename(temporaryPath, path);
 };
 
-export const pruneOldPriceFiles = async ({ today, tomorrow, directory = pricesDirectory }) => {
-  const retainedDates = new Set([today, tomorrow].map((date) => date.replaceAll('-', '')));
+export const pruneOldPriceFiles = async ({
+  today,
+  tomorrow,
+  directory = pricesDirectory,
+}) => {
+  const retainedDates = new Set(
+    [today, tomorrow].map((date) => date.replaceAll('-', '')),
+  );
   const entries = await readdir(directory, { withFileTypes: true });
   let removed = 0;
 
@@ -161,7 +176,9 @@ export const pruneOldPriceFiles = async ({ today, tomorrow, directory = pricesDi
 };
 
 const requestPVPC = async (date) => {
-  const response = await fetch(`https://api.esios.ree.es/archives/70/download_json?date=${date}`);
+  const response = await fetch(
+    `https://api.esios.ree.es/archives/70/download_json?date=${date}`,
+  );
   if (response.status === 404 || response.status === 204) {
     return null;
   }
@@ -198,7 +215,9 @@ const refreshFile = async ({ source, date, isToday }) => {
       const minimizedPayload = minimizePVPCPayload(existingPayload, date);
       if (minimizedPayload) {
         if (hasPVPCEstimateComponents(minimizedPayload)) {
-          if (JSON.stringify(existingPayload) !== JSON.stringify(minimizedPayload)) {
+          if (
+            JSON.stringify(existingPayload) !== JSON.stringify(minimizedPayload)
+          ) {
             await writeJSON(filePath, minimizedPayload);
             console.log(`Minimized ${fileName}.`);
             return true;
@@ -216,10 +235,15 @@ const refreshFile = async ({ source, date, isToday }) => {
             return true;
           }
         } catch (error) {
-          console.warn(`Unable to enrich ${fileName}; keeping existing PVPC prices.`, error);
+          console.warn(
+            `Unable to enrich ${fileName}; keeping existing PVPC prices.`,
+            error,
+          );
         }
 
-        console.log(`${fileName} already exists without estimate components; keeping it.`);
+        console.log(
+          `${fileName} already exists without estimate components; keeping it.`,
+        );
         return false;
       }
     }
@@ -228,7 +252,8 @@ const refreshFile = async ({ source, date, isToday }) => {
     return false;
   }
 
-  const data = source === 'pvpc' ? await requestPVPC(date) : await requestOMIE(date);
+  const data =
+    source === 'pvpc' ? await requestPVPC(date) : await requestOMIE(date);
   if (data === null) {
     const message = `${source.toUpperCase()} prices are not published or complete for ${date}.`;
     if (isToday) {
@@ -246,14 +271,19 @@ const refreshFile = async ({ source, date, isToday }) => {
 
 export const updatePrices = async (now = new Date()) => {
   const today = dayjs(now).tz(MADRID_TZ).format('YYYY-MM-DD');
-  const tomorrow = dayjs.tz(today, MADRID_TZ).add(1, 'day').format('YYYY-MM-DD');
+  const tomorrow = dayjs
+    .tz(today, MADRID_TZ)
+    .add(1, 'day')
+    .format('YYYY-MM-DD');
   const failures = [];
   let changed = false;
 
   for (const date of [today, tomorrow]) {
     for (const source of ['omie', 'pvpc']) {
       try {
-        changed = (await refreshFile({ source, date, isToday: date === today })) || changed;
+        changed =
+          (await refreshFile({ source, date, isToday: date === today })) ||
+          changed;
       } catch (error) {
         failures.push(error);
         console.error(error);
@@ -271,13 +301,19 @@ export const updatePrices = async (now = new Date()) => {
   }
 
   if (failures.length > 0) {
-    throw new AggregateError(failures, 'Failed to update one or more required daily price files.');
+    throw new AggregateError(
+      failures,
+      'Failed to update one or more required daily price files.',
+    );
   }
 
   return changed;
 };
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(resolve(process.argv[1])).href
+) {
   updatePrices().catch((error) => {
     console.error(error);
     process.exitCode = 1;
