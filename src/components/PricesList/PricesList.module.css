@@ -25,13 +25,13 @@
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 2px solid var(--pure-black);
+  border: 2px solid var(--legend-outline);
   border-radius: 2px;
 }
 
 .bestPrice {
   position: relative;
-  box-shadow: 0 0 0 3px var(--pure-white), 0 0 0 4px var(--pure-black);
+  box-shadow: 0 0 0 3px var(--pure-white), 0 0 0 4px var(--legend-outline);
 }
 
 .bestPrice::before,
@@ -41,7 +41,7 @@
   left: 8px;
   width: 2px;
   height: 12px;
-  background: var(--pure-black);
+  background: var(--legend-outline);
   content: '';
 }
 

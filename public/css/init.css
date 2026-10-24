@@ -22,6 +22,7 @@
   --accent: #8ee4af;
   --black: #111;
   --pure-black: #000;
+  --legend-outline: var(--border);
 }
 
 @media (prefers-color-scheme: dark) {
