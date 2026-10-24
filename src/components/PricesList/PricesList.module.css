@@ -25,7 +25,6 @@
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 2px solid var(--legend-outline);
   border-radius: 2px;
 }
 
@@ -47,8 +46,6 @@
     0 35%,
     35% 35%
   );
-  filter: drop-shadow(0 0 2px var(--pure-white))
-    drop-shadow(0 0 1px var(--legend-outline));
 }
 
 .circle {

@@ -22,7 +22,6 @@
   --accent: #8ee4af;
   --black: #111;
   --pure-black: #000;
-  --legend-outline: var(--border);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -80,7 +79,7 @@ body {
   margin: 1rem auto 0.7rem;
 }
 
-section + section {
+section+section {
   margin: 1rem 0;
 }
 
