@@ -1,6 +1,9 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { expectedHoursInDay, parseOmieCsv } from './update-prices.mjs';
+import { mkdtemp, readdir, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { expectedHoursInDay, parseOmieCsv, pruneOldPriceFiles } from './update-prices.mjs';
 
 describe('scheduled price ingestion', () => {
   it('accepts regular 24-period OMIE days and converts EUR/MWh to hundredths', () => {
@@ -55,5 +58,36 @@ describe('scheduled price ingestion', () => {
       () => parseOmieCsv('MARGINALPDBC;\n2026;10;24;1;120;120;', '2026-10-24'),
       /OMIE data is incomplete for 2026-10-24\./,
     );
+  });
+
+  it('keeps today and tomorrow prices and removes other daily price files', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'electrolite-prices-'));
+    const filenames = [
+      '20261023-omie.json',
+      '20261024-pvpc.json',
+      '20261025-omie.json',
+      '20261026-pvpc.json',
+      'not-a-price.json',
+    ];
+
+    try {
+      await Promise.all(filenames.map((filename) => writeFile(join(directory, filename), '{}')));
+
+      assert.equal(
+        await pruneOldPriceFiles({
+          today: '2026-10-24',
+          tomorrow: '2026-10-25',
+          directory,
+        }),
+        2,
+      );
+      assert.deepEqual((await readdir(directory)).sort(), [
+        '20261024-pvpc.json',
+        '20261025-omie.json',
+        'not-a-price.json',
+      ]);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
   });
 });

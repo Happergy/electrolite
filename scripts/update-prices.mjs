@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import Papa from 'papaparse';
-import { access, mkdir, rename, writeFile } from 'node:fs/promises';
+import { access, mkdir, readdir, rename, unlink, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -116,6 +116,25 @@ const writeJSON = async (path, value) => {
   await rename(temporaryPath, path);
 };
 
+export const pruneOldPriceFiles = async ({ today, tomorrow, directory = pricesDirectory }) => {
+  const retainedDates = new Set([today, tomorrow].map((date) => date.replaceAll('-', '')));
+  const entries = await readdir(directory, { withFileTypes: true });
+  let removed = 0;
+
+  for (const entry of entries) {
+    const match = /^(\d{8})-(?:omie|pvpc)\.json$/.exec(entry.name);
+    if (!entry.isFile() || !match || retainedDates.has(match[1])) {
+      continue;
+    }
+
+    await unlink(resolve(directory, entry.name));
+    console.log(`Removed ${entry.name}.`);
+    removed += 1;
+  }
+
+  return removed;
+};
+
 const requestPVPC = async (date) => {
   const response = await fetch(`https://api.esios.ree.es/archives/70/download_json?date=${date}`);
   if (response.status === 404 || response.status === 204) {
@@ -186,6 +205,15 @@ export const updatePrices = async (now = new Date()) => {
         failures.push(error);
         console.error(error);
       }
+    }
+  }
+
+  if (changed) {
+    try {
+      await pruneOldPriceFiles({ today, tomorrow });
+    } catch (error) {
+      failures.push(error);
+      console.error(error);
     }
   }
 
