@@ -1,0 +1,23 @@
+{
+  "name": "Electrolite",
+  "short_name": "Electrolite",
+  "start_url": "/electrolite/",
+  "scope": "/electrolite/",
+  "display": "standalone",
+  "background_color": "#153e43",
+  "theme_color": "#153e43",
+  "icons": [
+    {
+      "src": "/electrolite/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/electrolite/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
