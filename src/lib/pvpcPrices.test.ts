@@ -1,5 +1,4 @@
-/// <reference types="jest" />
-
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getPVPC } from './pvpcPrices';
 
 const mockResponse = (status: number, body: unknown): Response =>
@@ -10,7 +9,7 @@ const mockResponse = (status: number, body: unknown): Response =>
   }) as Response;
 
 const installFetchMock = (...responses: Response[]) => {
-  const fetchMock = jest.fn();
+  const fetchMock = vi.fn();
   for (const response of responses) {
     fetchMock.mockResolvedValueOnce(response);
   }

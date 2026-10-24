@@ -1,10 +1,9 @@
-/// <reference types="jest" />
-
+import { describe, expect, it, vi } from 'vitest';
 import { getCachedPriceData, normalizePriceDate } from './priceCache';
 
 describe('getCachedPriceData', () => {
   it('coalesces concurrent requests for the same source and date', async () => {
-    const load = jest.fn(async () => {
+    const load = vi.fn(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
       return [{ price: 123 }];
     });
@@ -20,7 +19,7 @@ describe('getCachedPriceData', () => {
   });
 
   it('does not coalesce requests for different dates', async () => {
-    const load = jest.fn(async () => [{ price: 123 }]);
+    const load = vi.fn(async () => [{ price: 123 }]);
 
     await Promise.all([
       getCachedPriceData('pvpc', '2026-10-12', load, { negativeTTL: 1000 }),

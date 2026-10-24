@@ -1,5 +1,4 @@
-/// <reference types="jest" />
-
+import { describe, expect, it } from 'vitest';
 import type { OmiePrice } from './omie';
 import type { PVPCPriceEntry } from './pvpcCache';
 import { estimatePVPCPrices } from './pvpcEstimate';
